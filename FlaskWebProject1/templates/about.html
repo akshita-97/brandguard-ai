@@ -2,9 +2,31 @@
 
 {% block content %}
 
-<h2>{{ title }}.</h2>
-<h3>{{ message }}</h3>
+<div class="hero mb-4">
+  <h1>About BrandGuard AI</h1>
+  <p class="mb-0">A brand-governance platform that checks content before publication.</p>
+</div>
 
-<p>Use this area to provide additional information.</p>
+<div class="card shadow-sm">
+  <div class="card-body">
+    <h5 class="fw-bold">What it does</h5>
+    <p>BrandGuard AI helps organizations check content against approved brand rules, terminology, and facts before publication. It detects possible issues, explains why they matter, suggests corrections, and requires a human reviewer to make the final decision.</p>
+
+    <h5 class="fw-bold mt-3">How it works</h5>
+    <ol>
+      <li>Paste or type content and select a brand profile.</li>
+      <li>The rule engine checks for prohibited terms, factual conflicts, unsupported claims, tone, and accessibility issues.</li>
+      <li>Optional AI adds contextual observations (when configured).</li>
+      <li>Review each finding: accept, reject, resolve, or mark as needing review.</li>
+      <li>Record a final human approval or rejection with notes.</li>
+    </ol>
+
+    <h5 class="fw-bold mt-3">Technology</h5>
+    <p class="mb-0">Python Flask backend, SQLite database, deterministic rule engine, optional OpenAI-compatible AI assistance, Bootstrap 5 frontend. Automated tests included.</p>
+
+    <h5 class="fw-bold mt-3">Demo data</h5>
+    <p class="mb-0 text-muted">All brand data in the demo profile is fictional and clearly labelled as demo data. No real company policies are represented.</p>
+  </div>
+</div>
 
 {% endblock %}

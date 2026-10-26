@@ -26,8 +26,6 @@ data/*.db-shm
 .DS_Store
 Thumbs.db
 obj/
-*.slnx
-*.pyproj
 *.pyproj.user
 
 # Logs

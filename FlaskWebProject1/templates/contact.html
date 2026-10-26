@@ -2,19 +2,20 @@
 
 {% block content %}
 
-<h2>{{ title }}.</h2>
-<h3>{{ message }}</h3>
+<div class="hero mb-4">
+  <h1>Contact</h1>
+  <p class="mb-0">Get in touch with the BrandGuard AI project team.</p>
+</div>
 
-<address>
-    One Microsoft Way<br />
-    Redmond, WA 98052-6399<br />
-    <abbr title="Phone">P:</abbr>
-    425.555.0100
-</address>
-
-<address>
-    <strong>Support:</strong>   <a href="mailto:Support@example.com">Support@example.com</a><br />
-    <strong>Marketing:</strong> <a href="mailto:Marketing@example.com">Marketing@example.com</a>
-</address>
+<div class="card shadow-sm">
+  <div class="card-body">
+    <p>BrandGuard AI is a hackathon project built for the Inkloom AI hackathon (Round 2).</p>
+    <p>For questions about the project, please reach out via the GitHub repository:</p>
+    <p><a href="https://github.com/akshita-97/brandguard-ai" target="_blank" rel="noopener" class="btn btn-primary">
+      <i class="bi bi-github me-1"></i>GitHub Repository
+    </a></p>
+    <p class="text-muted small mb-0">Note: This is a demo application. Do not submit confidential content to the public demo.</p>
+  </div>
+</div>
 
 {% endblock %}
