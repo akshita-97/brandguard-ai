@@ -119,6 +119,29 @@ Expected: all tests pass. Tests use a temporary SQLite database and disable AI.
 - Brand rules are read-only in the public demo; no anonymous admin editing.
 - Submitted content is stored for review history; do not submit confidential data to the public demo.
 
+## What makes BrandGuard AI different
+
+- Transparent, rule-based findings with direct links to the configured rule or approved fact that triggered them.
+- Honest handling of unknown claims: marked "Needs Review" instead of being declared false.
+- Human-controlled final approval — the system never auto-publishes.
+- Simple, lightweight workflow suitable for smaller teams (no heavy frameworks).
+- Clear explanations and actionable suggested corrections.
+
+## Completed features checklist
+
+- [x] Content submission with validation and sample content
+- [x] Brand profile + guidelines + approved facts (read-only demo)
+- [x] Review engine (prohibited terms, facts, claims, tone, accessibility, style, uncertain claims)
+- [x] Results dashboard with severity and per-issue review
+- [x] Human review and approval (accept/reject/resolve/needs-review + final decision)
+- [x] Persistent review history
+- [x] Optional AI assistance with safe fallback
+- [x] CSRF, validation, parameterized queries, output escaping
+- [x] Responsive UI, loading states, error messages
+- [x] Automated tests (17 passing)
+- [x] Public deployment (PythonAnywhere)
+- [x] README, submission doc, demo script
+
 ## Changes from Round 1
 
 - Converted the Round 1 proposal into a working Flask + SQLite application.

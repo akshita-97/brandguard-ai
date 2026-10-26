@@ -97,6 +97,8 @@ def check_content(profile_id: int, content: str) -> Dict[str, Any]:
     claims = [r for r in rules if r["rule_type"] == "unsupported_claim"]
     for r in claims:
         pat = r["pattern"]
+        # substring match (case-insensitive) so stems like "guarantee" catch
+        # "guarantees", "guaranteed", etc.
         regex = re.compile(re.escape(pat), re.IGNORECASE)
         matches = list(regex.finditer(text))
         if not matches:

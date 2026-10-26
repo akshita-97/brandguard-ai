@@ -144,7 +144,7 @@ def seed_if_empty():
              "Avoid 'obviously' because it can sound condescending to readers.", 0),
             ("preferred_term", "BrandGuard AI", None, "low",
              "Use the approved brand name 'BrandGuard AI' consistently.", 0),
-            ("unsupported_claim", "guaranteed", None, "high",
+            ("unsupported_claim", "guarantee", None, "high",
              "Claims of guarantees require legal review and supporting evidence.", 1),
             ("unsupported_claim", "100% effective", None, "critical",
              "Effectiveness percentages require verified test data and evidence.", 1),
@@ -179,7 +179,7 @@ def seed_if_empty():
              ["headquartered in ([A-Za-z ,]+)", "based in ([A-Za-z ,]+)", "headquarters in ([A-Za-z ,]+)"],
              "Demo brand fact (fictional).", 1),
             ("product_name", "BrandGuard AI",
-             ["product is ([A-Za-z0-9 ]+)", "our product ([A-Za-z0-9 ]+)"],
+             ["product is ([A-Za-z0-9 ]+)", "our product is ([A-Za-z0-9 ]+)"],
              "Demo brand fact (fictional).", 1),
         ]
         for key, val, pats, src, ver in facts:

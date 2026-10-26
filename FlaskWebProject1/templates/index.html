@@ -105,11 +105,17 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <p><strong>Original text:</strong> <span id="mOriginal"></span></p>
         <p><strong>Issue type:</strong> <span id="mType"></span> &nbsp; <strong>Severity:</strong> <span id="mSeverity"></span></p>
+        <div class="mb-2">
+          <div class="small text-muted mb-1">Original text</div>
+          <div class="finding-original" id="mOriginal"></div>
+        </div>
         <p><strong>Explanation:</strong> <span id="mExplanation"></span></p>
         <p><strong>Rule / fact:</strong> <span id="mRule"></span></p>
-        <p><strong>Suggested correction:</strong> <span id="mSuggestion"></span></p>
+        <div class="mb-2">
+          <div class="small text-muted mb-1">Suggested correction</div>
+          <div class="finding-original" style="background:#ecfdf5;border-color:#a7f3d0;" id="mSuggestion"></div>
+        </div>
         <div class="mb-2">
           <label for="mNotes" class="form-label">Reviewer notes</label>
           <textarea id="mNotes" class="form-control" rows="2"></textarea>
