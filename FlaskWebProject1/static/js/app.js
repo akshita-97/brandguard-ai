@@ -110,6 +110,16 @@
       document.getElementById("issueCount").textContent = data.total_issues;
       document.getElementById("aiUsed").textContent = data.ai_used ? "Yes" : "No";
 
+      const counts = { critical: 0, high: 0, medium: 0, low: 0 };
+      data.findings.forEach((f) => { if (counts[f.severity] !== undefined) counts[f.severity]++; });
+      const summaryEl = document.getElementById("severitySummary");
+      summaryEl.innerHTML =
+        `<span class="badge bg-danger me-1">critical ${counts.critical}</span>` +
+        `<span class="badge bg-warning text-dark me-1">high ${counts.high}</span>` +
+        `<span class="badge bg-info text-dark me-1">medium ${counts.medium}</span>` +
+        `<span class="badge bg-secondary me-1">low ${counts.low}</span>` +
+        (data.findings.length === 0 ? '<span class="text-success ms-2">No issues — ready to publish (after human approval).</span>' : '');
+
       const badge = document.getElementById("overallBadge");
       badge.textContent = data.overall_status;
       badge.className = "badge " + (data.overall_status === "Passed" ? "bg-success" : "bg-warning text-dark");
@@ -152,6 +162,8 @@
 
       document.getElementById("approveBtn").onclick = () => finalize("approved");
       document.getElementById("rejectBtn").onclick = () => finalize("rejected");
+      const printBtn = document.getElementById("printBtn");
+      if (printBtn) printBtn.addEventListener("click", () => window.print());
     }
 
     const findingModal = new bootstrap.Modal(document.getElementById("findingModal"));

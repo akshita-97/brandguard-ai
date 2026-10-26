@@ -55,6 +55,7 @@
           Issues: <strong id="issueCount">0</strong> &nbsp;|&nbsp;
           AI used: <strong id="aiUsed">No</strong>
         </div>
+        <div class="mb-3 small" id="severitySummary"></div>
         <div id="findingsList"></div>
         <div id="noIssues" class="alert alert-success d-none">No issues detected. Content passed the configured rules.</div>
         <hr>
@@ -64,6 +65,9 @@
           <div class="d-flex gap-2 mt-2">
             <button id="approveBtn" class="btn btn-success">Approve content</button>
             <button id="rejectBtn" class="btn btn-danger">Reject content</button>
+            <button id="printBtn" class="btn btn-outline-secondary ms-auto" type="button">
+              <i class="bi bi-printer me-1"></i>Print report
+            </button>
           </div>
           <div id="finalizeMsg" class="small mt-2"></div>
         </div>
