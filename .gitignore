@@ -21,6 +21,7 @@ data/*.db-shm
 *.sqlite3
 
 # IDE / OS
+.vs/
 .vscode/
 .idea/
 .DS_Store
