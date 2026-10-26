@@ -1,0 +1,78 @@
+{% extends "layout.html" %}
+{% block title %}Brand Guidelines - BrandGuard AI{% endblock %}
+{% block content %}
+<div class="d-flex align-items-center mb-3">
+  <i class="bi bi-journal-text fs-3 text-primary me-2"></i>
+  <h2 class="mb-0 fw-bold">Brand Guidelines</h2>
+</div>
+<div class="row g-4">
+  <div class="col-md-4">
+    <div class="card shadow-sm">
+      <div class="card-header fw-semibold">Brand profiles</div>
+      <div class="card-body">
+        <form method="get" action="{{ url_for('guidelines') }}">
+          <select name="profile_id" class="form-select" onchange="this.form.submit()">
+            {% for p in profiles %}
+            <option value="{{ p.id }}" {% if p.id == selected_id %}selected{% endif %}>
+              {{ p.name }}{% if p.is_demo %} (demo){% endif %}
+            </option>
+            {% endfor %}
+          </select>
+        </form>
+        <p class="small text-muted mt-2 mb-0">Guidelines are read-only in the public demo.</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-8">
+    {% if data %}
+    <div class="card shadow-sm mb-3">
+      <div class="card-header fw-semibold">{{ data.profile.name }}</div>
+      <div class="card-body">
+        <p class="text-muted">{{ data.profile.description }}</p>
+      </div>
+    </div>
+    <div class="card shadow-sm mb-3">
+      <div class="card-header fw-semibold">Brand rules</div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-sm mb-0">
+            <thead><tr><th>Type</th><th>Pattern</th><th>Severity</th><th>Explanation</th></tr></thead>
+            <tbody>
+            {% for r in data.rules %}
+            <tr>
+              <td><span class="badge bg-secondary">{{ r.rule_type }}</span></td>
+              <td><code>{{ r.pattern }}</code>{% if r.replacement %} &rarr; <code>{{ r.replacement }}</code>{% endif %}</td>
+              <td>{{ r.severity }}</td>
+              <td class="small">{{ r.explanation }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="card shadow-sm">
+      <div class="card-header fw-semibold">Approved facts</div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-sm mb-0">
+            <thead><tr><th>Key</th><th>Approved value</th><th>Source</th></tr></thead>
+            <tbody>
+            {% for f in data.facts %}
+            <tr>
+              <td><code>{{ f.fact_key }}</code></td>
+              <td>{{ f.fact_value }}</td>
+              <td class="small text-muted">{{ f.source }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <div class="alert alert-warning">No profile selected.</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
