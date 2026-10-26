@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # BrandGuard AI
 
 BrandGuard AI is a brand-governance web application that checks content before publication against approved brand rules, terminology, and facts. It detects possible issues, explains why they matter, suggests corrections, and requires a human reviewer to make the final decision.
@@ -166,6 +165,3 @@ These are planned, not yet implemented.
 - Fact checking uses configured patterns; arbitrary unstructured claims are flagged as "Needs Review" rather than judged false.
 - No user authentication in the public demo; rules are read-only.
 - CSRF protection is lightweight and session-based.
-=======
-# brandguard-ai
->>>>>>> 339c6c7d498c2e0ff5a8322c8f6bf8e02d53fdf2
