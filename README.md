@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # BrandGuard AI
 
 BrandGuard AI is a brand-governance web application that checks content before publication against approved brand rules, terminology, and facts. It detects possible issues, explains why they matter, suggests corrections, and requires a human reviewer to make the final decision.
@@ -48,27 +49,54 @@ FlaskWebProject1/
 
 ## Setup (Windows / VS Code)
 
-1. Open the `FlaskWebProject1` folder in VS Code or Visual Studio.
-2. Create a virtual environment (optional but recommended):
+### Main file to run
+- **`runserver.py`** is the main file. It starts the Flask server, creates the database, and seeds demo data automatically.
+
+### Step-by-step (VS Code)
+1. Open VS Code → **File → Open Folder** → select the `FlaskWebProject1` folder.
+2. Open the terminal (`Ctrl + `` ` ``).
+3. (First time only) Create a virtual environment:
    ```powershell
    python -m venv .venv
+   ```
+4. Activate it:
+   ```powershell
    .venv\Scripts\Activate.ps1
    ```
-3. Install dependencies:
+   (If you get a permission error, run once: `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`)
+5. Install dependencies:
    ```powershell
    pip install -r requirements.txt
    ```
-4. Copy `.env.example` to `.env` and set values (optional AI key):
+   > The message *"A new release of pip is available"* is just a notice — ignore it.
+6. Create your local `.env` file:
    ```powershell
    Copy-Item .env.example .env
    ```
-5. Run the app:
+7. Run the main file:
    ```powershell
    python runserver.py
    ```
-   Then open http://localhost:5555 in your browser.
+8. Open **http://localhost:5555** in your browser.
 
-In Visual Studio, set `runserver.py` as the startup file and press F5.
+### Important: always run from the project folder
+If you close VS Code and run again, make sure you are in the right folder first:
+```powershell
+cd D:\codestar30\FlaskWebProject1
+python runserver.py
+```
+
+### Visual Studio
+Set `runserver.py` as the startup file and press **F5**.
+
+### Troubleshooting
+- **"No such file or directory: runserver.py"** → you are in the wrong folder. Run the `cd` command above.
+- **"ModuleNotFoundError: flask"** → run `pip install -r requirements.txt` again.
+- **"Address already in use"** → a previous run is still active:
+  ```powershell
+  Get-Process -Name python | Stop-Process -Force
+  ```
+- **Permission error activating venv** → run `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` once.
 
 ## Tests
 
@@ -115,3 +143,6 @@ These are planned, not yet implemented.
 - Fact checking uses configured patterns; arbitrary unstructured claims are flagged as "Needs Review" rather than judged false.
 - No user authentication in the public demo; rules are read-only.
 - CSRF protection is lightweight and session-based.
+=======
+# brandguard-ai
+>>>>>>> 339c6c7d498c2e0ff5a8322c8f6bf8e02d53fdf2
