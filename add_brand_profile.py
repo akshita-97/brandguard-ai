@@ -41,6 +41,17 @@ FACTS = [
      ["headquartered in ([A-Za-z ,]+)", "based in ([A-Za-z ,]+)"],
      "Your approved source.", 1),
 ]
+
+# Brand colours for visual checking: (hex_code, name, is_primary 0/1, min_usage_percent)
+COLORS = [
+    ("#4F46E5", "Primary", 1, 15.0),
+    ("#06B6D4", "Accent", 0, 5.0),
+]
+
+# Brand assets (logo rules): (asset_type, filename, min_width, min_height, allowed_formats)
+ASSETS = [
+    ("logo", "logo.png", 200, 60, "png,svg"),
+]
 # --------------------------------------
 
 conn = get_connection()
@@ -65,11 +76,12 @@ for key, val, pats, src, ver in FACTS:
         (profile_id, key, val, json.dumps(pats), src, ver),
     )
 
-# Default brand colours and assets
-for hexc, name, primary, pct in [("#4F46E5","Primary",1,15.0),("#06B6D4","Accent",0,5.0)]:
+# Brand colours
+for hexc, name, primary, pct in COLORS:
     cur.execute("INSERT INTO brand_colors (profile_id, hex_code, name, is_primary, min_usage_percent) VALUES (?,?,?,?,?)",
                 (profile_id, hexc, name, primary, pct))
-for atype, fname, mw, mh, fmts in [("logo","logo.png",200,60,"png,svg")]:
+# Brand assets (logo rules)
+for atype, fname, mw, mh, fmts in ASSETS:
     cur.execute("INSERT INTO brand_assets (profile_id, asset_type, filename, min_width, min_height, allowed_formats) VALUES (?,?,?,?,?,?)",
                 (profile_id, atype, fname, mw, mh, fmts))
 

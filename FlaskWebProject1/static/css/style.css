@@ -18,8 +18,7 @@
 * { box-sizing: border-box; }
 
 body {
-  background: linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 100%);
-  background-attachment: fixed;
+  background: #ffffff;
   color: var(--text);
   font-family: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
   min-height: 100vh;
@@ -44,6 +43,7 @@ body {
   transition: color .15s ease, transform .15s ease;
 }
 .nav-link:hover { color: #c7d2fe !important; transform: translateY(-1px); }
+.nav-link.active { color: #fff !important; background: rgba(255,255,255,0.15); border-radius: 8px; }
 .navbar-text .badge { font-size: .72rem; padding: .35rem .6rem; }
 
 /* Cards */

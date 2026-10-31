@@ -96,6 +96,11 @@
       </div>
       <div class="card-body small">
         <p class="text-muted mb-2">Upload a logo, banner, or graphic to check colours, dimensions, and format.</p>
+        <div class="alert alert-info py-1 px-2 mb-2" style="font-size:.78rem;">
+          <strong>How it works:</strong> Approved colours: indigo, cyan, emerald, slate.
+          Min size: 200×60px. Formats: PNG, JPG, SVG.
+          Upload a red/green image to see a colour mismatch; upload a small image to see a dimension flag.
+        </div>
         <input type="file" id="visualUpload" class="form-control form-control-sm mb-2" accept="image/*">
         <button id="visualBtn" class="btn btn-primary btn-sm w-100">Check image</button>
         <div id="visualResult" class="mt-3"></div>

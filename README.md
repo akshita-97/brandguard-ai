@@ -118,6 +118,38 @@ Expected: all tests pass. Tests use a temporary SQLite database and disable AI.
 - Brand rules are read-only in the public demo; no anonymous admin editing.
 - Submitted content is stored for review history; do not submit confidential data to the public demo.
 
+## How to add a new brand profile (with logo and colours)
+
+Use the helper script `add_brand_profile.py`. Edit the values at the top:
+
+```python
+PROFILE_NAME = "My Company"
+PROFILE_DESCRIPTION = "Brand profile for My Company."
+
+RULES = [
+    ("prohibited_term", "cheap", "affordable", "high", "Avoid 'cheap'.", 0),
+    ("unsupported_claim", "guaranteed", None, "high", "Needs legal review.", 1),
+    ("accessibility", "click here", "use descriptive link", "medium", "Not accessible.", 0),
+]
+
+FACTS = [
+    ("founding_year", "2020", ["founded in (\\d{4})"], "Company records.", 1),
+]
+
+# Brand colours (for visual checking)
+COLORS = [("#FF0000", "Brand Red", 1, 20.0), ("#000000", "Black", 0, 10.0)]
+
+# Brand assets (logo rules)
+ASSETS = [("logo", "logo.png", 300, 100, "png,svg")]
+```
+
+Then run:
+```powershell
+python add_brand_profile.py
+```
+
+The new profile, rules, facts, colours, and logo dimension rules appear in the app immediately (refresh the page). To use real brand data instead of the demo, create a profile this way and select it from the dropdown.
+
 ## What makes BrandGuard AI different
 
 - Transparent, rule-based findings with direct links to the configured rule or approved fact that triggered them.

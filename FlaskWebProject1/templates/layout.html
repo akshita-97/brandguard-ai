@@ -18,11 +18,11 @@
     </button>
     <div class="collapse navbar-collapse" id="nav">
       <ul class="navbar-nav ms-auto">
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('home') }}"><i class="bi bi-clipboard-check me-1"></i>Review</a></li>
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('guidelines') }}"><i class="bi bi-journal-text me-1"></i>Guidelines</a></li>
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('history_page') }}"><i class="bi bi-clock-history me-1"></i>History</a></li>
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('analytics_page') }}"><i class="bi bi-bar-chart me-1"></i>Analytics</a></li>
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('about') }}"><i class="bi bi-info-circle me-1"></i>About</a></li>
+        <li class="nav-item"><a class="nav-link {% if request.endpoint in ('home',) %}active fw-bold{% endif %}" href="{{ url_for('home') }}"><i class="bi bi-clipboard-check me-1"></i>Review</a></li>
+        <li class="nav-item"><a class="nav-link {% if request.endpoint == 'guidelines' %}active fw-bold{% endif %}" href="{{ url_for('guidelines') }}"><i class="bi bi-journal-text me-1"></i>Guidelines</a></li>
+        <li class="nav-item"><a class="nav-link {% if request.endpoint == 'history_page' %}active fw-bold{% endif %}" href="{{ url_for('history_page') }}"><i class="bi bi-clock-history me-1"></i>History</a></li>
+        <li class="nav-item"><a class="nav-link {% if request.endpoint == 'analytics_page' %}active fw-bold{% endif %}" href="{{ url_for('analytics_page') }}"><i class="bi bi-bar-chart me-1"></i>Analytics</a></li>
+        <li class="nav-item"><a class="nav-link {% if request.endpoint == 'about' %}active fw-bold{% endif %}" href="{{ url_for('about') }}"><i class="bi bi-info-circle me-1"></i>About</a></li>
         <li class="nav-item"><a class="nav-link" href="{{ url_for('notifications_page') }}"><i class="bi bi-bell me-1"></i>Notifications{% if unread_count %}<span class="badge bg-danger ms-1">{{ unread_count }}</span>{% endif %}</a></li>
         {% if current_user %}
         <li class="nav-item"><span class="nav-link text-info"><i class="bi bi-person-circle me-1"></i>{{ current_user.display_name or current_user.username }} ({{ current_user.role }})</span></li>
