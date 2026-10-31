@@ -65,6 +65,14 @@ for key, val, pats, src, ver in FACTS:
         (profile_id, key, val, json.dumps(pats), src, ver),
     )
 
+# Default brand colours and assets
+for hexc, name, primary, pct in [("#4F46E5","Primary",1,15.0),("#06B6D4","Accent",0,5.0)]:
+    cur.execute("INSERT INTO brand_colors (profile_id, hex_code, name, is_primary, min_usage_percent) VALUES (?,?,?,?,?)",
+                (profile_id, hexc, name, primary, pct))
+for atype, fname, mw, mh, fmts in [("logo","logo.png",200,60,"png,svg")]:
+    cur.execute("INSERT INTO brand_assets (profile_id, asset_type, filename, min_width, min_height, allowed_formats) VALUES (?,?,?,?,?,?)",
+                (profile_id, atype, fname, mw, mh, fmts))
+
 conn.commit()
 conn.close()
 print(f"Added profile '{PROFILE_NAME}' with id {profile_id}.")

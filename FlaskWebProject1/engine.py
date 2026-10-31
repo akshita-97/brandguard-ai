@@ -47,7 +47,8 @@ def load_profile(profile_id: int) -> Dict[str, Any]:
 
 
 def _finding(original_text, issue_type, severity, explanation, rule_reference=None,
-             suggested_correction=None, status="Needs Review", requires_evidence=False):
+             suggested_correction=None, status="Needs Review", requires_evidence=False,
+             confidence="high", citation=None):
     return {
         "original_text": original_text,
         "issue_type": issue_type,
@@ -57,6 +58,8 @@ def _finding(original_text, issue_type, severity, explanation, rule_reference=No
         "suggested_correction": suggested_correction,
         "status": status,
         "requires_evidence": requires_evidence,
+        "confidence": confidence,
+        "citation": citation,
     }
 
 
@@ -189,11 +192,17 @@ def check_content(profile_id: int, content: str) -> Dict[str, Any]:
                 extracted_norm = (extracted or "").strip().lower().rstrip(".,!?")
                 if extracted_norm and extracted_norm != approved:
                     snippet = _context(text, m.start(), m.end())
+                    doc = f.get("source_document") or "Demo brand guidelines"
+                    section = f.get("section") or "General"
+                    version = f.get("version") or "1.0"
+                    citation = f"{doc} — {section} (v{version})"
                     findings.append(_finding(
                         snippet, "factual_conflict", "high",
                         f"Content states '{extracted.strip()}' but the approved fact is '{f['fact_value']}'.",
                         rule_reference=f"Approved fact ({f['fact_key']}): {f['fact_value']} (source: {f.get('source') or 'demo'})",
                         suggested_correction=f"Correct to the approved fact: {f['fact_value']}.",
+                        confidence="high",
+                        citation=citation,
                     ))
                     break
 
@@ -221,6 +230,8 @@ def check_content(profile_id: int, content: str) -> Dict[str, Any]:
                 rule_reference="Approved facts (none match this number)",
                 suggested_correction="Verify this statistic and cite a source, or remove it.",
                 status="Needs Review", requires_evidence=True,
+                confidence="low",
+                citation="No approved source found",
             ))
     for m in re.finditer(r"\b(?:over|more than|up to)\s+(\d[\d,]*)\s+(?:customers|users|clients|companies)\b", lower):
         num = m.group(1).replace(",", "")
@@ -231,6 +242,8 @@ def check_content(profile_id: int, content: str) -> Dict[str, Any]:
                 rule_reference="Approved facts (none match this count)",
                 suggested_correction="Verify the count against approved data or remove the claim.",
                 status="Needs Review", requires_evidence=True,
+                confidence="low",
+                citation="No approved source found",
             ))
 
     seen = set()

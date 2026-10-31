@@ -137,6 +137,7 @@
               <div>
                 <span class="badge bg-secondary me-1">${escapeHtml(f.issue_type)}</span>
                 ${sevBadge(f.severity)}
+                ${f.confidence ? `<span class="badge bg-dark ms-1" title="Confidence level">conf: ${escapeHtml(f.confidence)}</span>` : ""}
                 ${f.requires_evidence ? '<span class="badge bg-light text-dark border ms-1">needs evidence</span>' : ""}
               </div>
               <button class="btn btn-sm btn-outline-primary review-btn" data-idx="${idx}">Review</button>
@@ -147,6 +148,7 @@
             </div>
             <div class="mb-2"><strong>Explanation:</strong> ${escapeHtml(f.explanation)}</div>
             ${f.rule_reference ? `<div class="mb-2 small"><strong>Rule / fact:</strong> ${escapeHtml(f.rule_reference)}</div>` : ""}
+            ${f.citation ? `<div class="mb-2 small"><strong>Source / citation:</strong> <span class="text-primary">${escapeHtml(f.citation)}</span></div>` : ""}
             ${f.suggested_correction ? `<div class="mb-2"><strong>Suggested correction:</strong> ${escapeHtml(f.suggested_correction)}</div>` : ""}
             <div class="small text-muted">Status: <span class="badge bg-light text-dark border badge-status" id="status-${idx}">${escapeHtml(f.status || "Needs Review")}</span></div>
           </div>`;
@@ -164,6 +166,42 @@
       document.getElementById("rejectBtn").onclick = () => finalize("rejected");
       const printBtn = document.getElementById("printBtn");
       if (printBtn) printBtn.addEventListener("click", () => window.print());
+
+      // Visual brand check
+      const visualBtn = document.getElementById("visualBtn");
+      if (visualBtn) {
+        visualBtn.addEventListener("click", async () => {
+          const fileInput = document.getElementById("visualUpload");
+          const result = document.getElementById("visualResult");
+          if (!fileInput.files.length) { result.innerHTML = '<div class="text-danger small">Please select an image first.</div>'; return; }
+          const profile_id = document.getElementById("profileSelect").value;
+          const fd = new FormData();
+          fd.append("file", fileInput.files[0]);
+          fd.append("profile_id", profile_id);
+          result.innerHTML = '<div class="text-muted small">Checking image...</div>';
+          try {
+            const res = await fetch("/api/visual/check", {
+              method: "POST",
+              headers: { "X-CSRFToken": csrfToken() },
+              body: fd
+            });
+            const data = await res.json();
+            if (!res.ok) { result.innerHTML = '<div class="text-danger small">' + (data.error || 'Failed') + '</div>'; return; }
+            let html = '<div class="small fw-bold mb-2">Visual findings: ' + data.total_issues + '</div>';
+            data.findings.forEach((f) => {
+              html += `<div class="border rounded p-2 mb-2 small">
+                <div class="mb-1"><span class="badge bg-secondary">${escapeHtml(f.issue_type)}</span> ${sevBadge(f.severity)}</div>
+                <div class="finding-original mb-1" style="font-size:.75rem;">${escapeHtml(f.original_text)}</div>
+                <div>${escapeHtml(f.explanation)}</div>
+                ${f.suggested_correction ? `<div class="mt-1"><strong>Suggestion:</strong> ${escapeHtml(f.suggested_correction)}</div>` : ""}
+              </div>`;
+            });
+            result.innerHTML = html;
+          } catch (e) {
+            result.innerHTML = '<div class="text-danger small">Error: ' + e.message + '</div>';
+          }
+        });
+      }
     }
 
     const findingModal = new bootstrap.Modal(document.getElementById("findingModal"));
@@ -176,8 +214,10 @@
       document.getElementById("mOriginal").textContent = f.original_text || "";
       document.getElementById("mType").textContent = f.issue_type || "";
       document.getElementById("mSeverity").textContent = f.severity || "";
+      document.getElementById("mConfidence").textContent = f.confidence || "medium";
       document.getElementById("mExplanation").textContent = f.explanation || "";
       document.getElementById("mRule").textContent = f.rule_reference || "";
+      document.getElementById("mCitation").textContent = f.citation || "—";
       document.getElementById("mSuggestion").textContent = f.suggested_correction || "";
       document.getElementById("mNotes").value = "";
       findingModal.show();
@@ -271,11 +311,13 @@
           data.findings.forEach((f) => {
             html += `<div class="border rounded p-2 mb-2">
               <div class="mb-1"><span class="badge bg-secondary">${escapeHtml(f.issue_type)}</span> ${sevBadge(f.severity)}
+                <span class="badge bg-dark ms-1">conf: ${escapeHtml(f.confidence || "medium")}</span>
                 <span class="badge bg-light text-dark border ms-1">${escapeHtml(f.status)}</span>
                 ${f.reviewer_decision ? `<span class="badge bg-info text-dark ms-1">${escapeHtml(f.reviewer_decision)}</span>` : ""}
               </div>
               <div class="finding-original mb-1">${escapeHtml(f.original_text)}</div>
               <div class="small">${escapeHtml(f.explanation)}</div>
+              ${f.citation ? `<div class="small mt-1"><strong>Source:</strong> ${escapeHtml(f.citation)}</div>` : ""}
               ${f.suggested_correction ? `<div class="small mt-1"><strong>Suggestion:</strong> ${escapeHtml(f.suggested_correction)}</div>` : ""}
               ${f.reviewer_notes ? `<div class="small mt-1 text-muted"><strong>Reviewer notes:</strong> ${escapeHtml(f.reviewer_notes)}</div>` : ""}
             </div>`;

@@ -126,7 +126,7 @@ Expected: all tests pass. Tests use a temporary SQLite database and disable AI.
 - Simple, lightweight workflow suitable for smaller teams (no heavy frameworks).
 - Clear explanations and actionable suggested corrections.
 
-## Completed features checklist
+## Completed features checklist (Round 2 + Round 3)
 
 - [x] Content submission with validation and sample content
 - [x] Brand profile + guidelines + approved facts (read-only demo)
@@ -140,6 +140,13 @@ Expected: all tests pass. Tests use a temporary SQLite database and disable AI.
 - [x] Automated tests (17 passing)
 - [x] Public deployment (PythonAnywhere)
 - [x] README, submission doc, demo script
+- [x] Evidence-backed findings with source citation and confidence (Round 3)
+- [x] Visual brand checking: image upload, colour/dimension/format checks (Round 3)
+- [x] User accounts with roles (author/reviewer/approver) and login/logout (Round 3)
+- [x] Analytics dashboard (approval rates, issue types, reviewer workload) (Round 3)
+- [x] In-app notifications (Round 3)
+- [x] CMS webhook integration on approval (Round 3)
+- [x] Document upload for fact extraction (.txt/.pdf) (Round 3)
 
 ## Changes from Round 1
 
@@ -150,13 +157,13 @@ Expected: all tests pass. Tests use a temporary SQLite database and disable AI.
 - Added optional AI assistance with safe fallback.
 - Added automated tests.
 
-## Three planned Round 3 improvements
+## Round 3 improvements (completed)
 
-1. Visual brand checking for uploaded logos, colours, and images.
-2. Evidence-backed factual verification with guideline citations and confidence scoring.
-3. Team collaboration, review analytics dashboard, and integrations with publishing tools (CMS/API).
+1. **Evidence-backed factual verification** — every factual finding now includes a source citation (document, section, version) and confidence level (high/medium/low). Document upload (.txt/.pdf) extracts candidate facts.
+2. **Visual brand checking** — upload images (logos, banners) to check brand colours (hex match), dimensions, and file format. Returns visual findings in the same format as text findings.
+3. **Team collaboration + analytics + CMS integration** — user accounts with roles (author/reviewer/approver), login/logout, analytics dashboard (approval rates, issue types, reviewer workload), in-app notifications, and CMS webhook on approval.
 
-These are planned, not yet implemented.
+All three improvements are implemented and tested.
 
 ## Limitations / known issues
 

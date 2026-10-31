@@ -150,6 +150,8 @@ def enhance(content: str, findings: list) -> dict:
                 "suggested_correction": sugg or "Review and adjust wording.",
                 "status": "Needs Review",
                 "requires_evidence": (itype in {"unsupported_claim", "uncertain_claim"}),
+                "confidence": "medium",
+                "citation": f"AI model: {Config.AI_MODEL} (advisory, not an approved source)",
             })
             count += 1
             ai_used = True

@@ -11,7 +11,7 @@ Organizations struggle to ensure content follows approved brand guidelines befor
 ## 3. Proposed solution
 BrandGuard AI is a brand-governance web app. A user pastes content, selects a brand profile, and clicks "Check Content". The backend checks the content against approved rules, terminology, and facts, and returns findings with explanations and suggested corrections. A human reviewer accepts/rejects each suggestion and records a final approval/rejection. All results and decisions are saved as review history.
 
-## 4. Completed features (Round 2)
+## 4. Completed features (Round 2 + Round 3)
 - Content submission with brand-profile selector, validation, loading state, and sample content.
 - Brand guidelines and approved facts viewer (read-only in public demo).
 - Deterministic review engine: prohibited terms, factual conflicts, unsupported claims, tone, accessibility, style, uncertain numeric claims.
@@ -20,6 +20,13 @@ BrandGuard AI is a brand-governance web app. A user pastes content, selects a br
 - Review history stored in SQLite, list + detail view.
 - Optional AI assistance (OpenAI-compatible API) with safe fallback; visible "AI assist on/off" badge.
 - Security: CSRF tokens, server-side validation, parameterized SQL, output escaping, request size limits, read-only public rules.
+- Evidence-backed findings with source citation and confidence level (Round 3).
+- Visual brand checking: image upload, colour/dimension/format checks (Round 3).
+- User accounts with roles (author/reviewer/approver) and login/logout (Round 3).
+- Analytics dashboard: approval rates, issue types, reviewer workload (Round 3).
+- In-app notifications (Round 3).
+- CMS webhook integration on approval (Round 3).
+- Document upload for fact extraction (.txt/.pdf) (Round 3).
 
 ## 5. Technology stack
 - Frontend: HTML5, CSS3, JavaScript, Bootstrap 5 (CDN), Bootstrap Icons.
@@ -50,10 +57,10 @@ BrandGuard AI is a brand-governance web app. A user pastes content, selects a br
 - Deployed publicly on PythonAnywhere with persistent storage.
 - Improved UI to a professional dashboard with responsive layout.
 
-## 8. Three Round 3 improvements (planned, not yet implemented)
-1. Visual brand checking for uploaded logos, colours, and images.
-2. Evidence-backed factual verification with guideline citations and confidence scoring.
-3. Team collaboration, review analytics dashboard, and integrations with publishing tools (CMS/API).
+## 8. Round 3 improvements (completed)
+1. **Evidence-backed factual verification** — every factual finding includes a source citation (document, section, version) and confidence level (high/medium/low). Document upload (.txt/.pdf) extracts candidate facts.
+2. **Visual brand checking** — upload images (logos, banners) to check brand colours, dimensions, and file format. Returns visual findings in the same format as text findings.
+3. **Team collaboration + analytics + CMS integration** — user accounts with roles (author/reviewer/approver), login/logout, analytics dashboard, in-app notifications, and CMS webhook on approval.
 
 ## 9. Limitations and known issues
 - AI requires an external API key and network; disabled by default.

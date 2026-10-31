@@ -1,6 +1,35 @@
 {% extends "layout.html" %}
 {% block title %}Brand Guidelines - BrandGuard AI{% endblock %}
 {% block content %}
+<script>
+(function() {
+  const btn = document.getElementById('extractBtn');
+  if (!btn) return;
+  btn.addEventListener('click', async () => {
+    const fileInput = document.getElementById('docUpload');
+    const result = document.getElementById('extractResult');
+    if (!fileInput.files.length) { result.innerHTML = '<div class="text-danger">Please select a file first.</div>'; return; }
+    const fd = new FormData();
+    fd.append('file', fileInput.files[0]);
+    result.innerHTML = '<div class="text-muted">Extracting...</div>';
+    try {
+      const res = await fetch('/api/facts/extract', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content },
+        body: fd
+      });
+      const data = await res.json();
+      if (!res.ok) { result.innerHTML = '<div class="text-danger">' + (data.error || 'Failed') + '</div>'; return; }
+      let html = '<div class="text-success mb-2">Extracted ' + data.line_count + ' candidate facts from ' + data.filename + ':</div><ul class="mb-0">';
+      data.candidates.forEach(c => { html += '<li>' + c.replace(/</g,'&lt;') + '</li>'; });
+      html += '</ul><div class="text-muted mt-2 small">Review these and add approved facts via add_brand_profile.py or the database.</div>';
+      result.innerHTML = html;
+    } catch (e) {
+      result.innerHTML = '<div class="text-danger">Error: ' + e.message + '</div>';
+    }
+  });
+})();
+</script>
 <div class="d-flex align-items-center mb-3">
   <i class="bi bi-journal-text fs-3 text-primary me-2"></i>
   <h2 class="mb-0 fw-bold">Brand Guidelines</h2>
@@ -29,6 +58,15 @@
       <div class="card-header fw-semibold">{{ data.profile.name }}</div>
       <div class="card-body">
         <p class="text-muted">{{ data.profile.description }}</p>
+        <div class="mt-2">
+          <label class="form-label small fw-bold">CMS Webhook URL (optional)</label>
+          <div class="input-group input-group-sm">
+            <input id="webhookUrl" class="form-control" placeholder="https://your-cms.com/webhook" value="{{ data.profile.webhook_url or '' }}">
+            <button id="saveWebhook" class="btn btn-outline-primary">Save</button>
+          </div>
+          <div class="small text-muted mt-1">When set, approved content is POSTed to this URL (CMS integration).</div>
+          <div id="webhookMsg" class="small mt-1"></div>
+        </div>
       </div>
     </div>
     <div class="card shadow-sm mb-3">
@@ -51,18 +89,34 @@
         </div>
       </div>
     </div>
+    <div class="card shadow-sm mb-3">
+      <div class="card-header fw-semibold d-flex justify-content-between align-items-center">
+        <span>Upload document for fact extraction</span>
+        <span class="badge bg-secondary">Improvement 1</span>
+      </div>
+      <div class="card-body">
+        <p class="small text-muted mb-2">Upload a .txt or .pdf file. The system extracts text lines as candidate approved facts for review.</p>
+        <input type="file" id="docUpload" class="form-control mb-2" accept=".txt,.pdf">
+        <button id="extractBtn" class="btn btn-primary btn-sm">Extract candidate facts</button>
+        <div id="extractResult" class="mt-3 small"></div>
+      </div>
+    </div>
     <div class="card shadow-sm">
       <div class="card-header fw-semibold">Approved facts</div>
       <div class="card-body p-0">
         <div class="table-responsive">
           <table class="table table-sm mb-0">
-            <thead><tr><th>Key</th><th>Approved value</th><th>Source</th></tr></thead>
+            <thead><tr><th>Key</th><th>Approved value</th><th>Source / Citation</th><th>Confidence</th></tr></thead>
             <tbody>
             {% for f in data.facts %}
             <tr>
               <td><code>{{ f.fact_key }}</code></td>
               <td>{{ f.fact_value }}</td>
-              <td class="small text-muted">{{ f.source }}</td>
+              <td class="small text-muted">
+                {{ f.source or '—' }}<br>
+                <span class="text-primary">{{ f.source_document or '' }}{% if f.section %} — {{ f.section }}{% endif %}{% if f.version %} (v{{ f.version }}){% endif %}</span>
+              </td>
+              <td><span class="badge bg-dark">{{ f.confidence or 'high' }}</span></td>
             </tr>
             {% endfor %}
             </tbody>
@@ -75,4 +129,28 @@
     {% endif %}
   </div>
 </div>
+{% endblock %}{% block scripts %}
+<script>
+(function() {
+  const btn = document.getElementById('saveWebhook');
+  if (!btn) return;
+  btn.addEventListener('click', async () => {
+    const url = document.getElementById('webhookUrl').value.trim();
+    const msg = document.getElementById('webhookMsg');
+    const pid = {{ selected_id }};
+    try {
+      const res = await fetch('/api/profile/' + pid + '/webhook', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content },
+        body: JSON.stringify({ webhook_url: url })
+      });
+      const data = await res.json();
+      if (!res.ok) { msg.innerHTML = '<span class="text-danger">' + (data.error || 'Failed') + '</span>'; return; }
+      msg.innerHTML = '<span class="text-success">Webhook URL saved.</span>';
+    } catch (e) {
+      msg.innerHTML = '<span class="text-danger">Error: ' + e.message + '</span>';
+    }
+  });
+})();
+</script>
 {% endblock %}

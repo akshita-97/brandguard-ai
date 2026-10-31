@@ -1,0 +1,91 @@
+{% extends "layout.html" %}
+{% block title %}Analytics - BrandGuard AI{% endblock %}
+{% block content %}
+<div class="d-flex align-items-center mb-3">
+  <i class="bi bi-bar-chart fs-3 text-primary me-2"></i>
+  <h2 class="mb-0 fw-bold">Review Analytics</h2>
+  <span class="badge bg-secondary ms-2">Improvement 3</span>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="card text-center shadow-sm"><div class="card-body">
+      <div class="fs-2 fw-bold text-primary">{{ data.total_reviews }}</div>
+      <div class="small text-muted">Total reviews</div>
+    </div></div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-center shadow-sm"><div class="card-body">
+      <div class="fs-2 fw-bold text-success">{{ data.approved }}</div>
+      <div class="small text-muted">Approved</div>
+    </div></div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-center shadow-sm"><div class="card-body">
+      <div class="fs-2 fw-bold text-danger">{{ data.rejected }}</div>
+      <div class="small text-muted">Rejected</div>
+    </div></div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-center shadow-sm"><div class="card-body">
+      <div class="fs-2 fw-bold text-warning">{{ data.pending }}</div>
+      <div class="small text-muted">Pending decision</div>
+    </div></div>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-6">
+    <div class="card shadow-sm">
+      <div class="card-header fw-semibold">Findings by severity</div>
+      <div class="card-body">
+        <div class="mb-2"><span class="badge bg-danger me-2">critical</span> {{ data.severity.get('critical', 0) }}</div>
+        <div class="mb-2"><span class="badge bg-warning text-dark me-2">high</span> {{ data.severity.get('high', 0) }}</div>
+        <div class="mb-2"><span class="badge bg-info text-dark me-2">medium</span> {{ data.severity.get('medium', 0) }}</div>
+        <div class="mb-2"><span class="badge bg-secondary me-2">low</span> {{ data.severity.get('low', 0) }}</div>
+        <div class="mt-2 small text-muted">Total findings: {{ data.total_findings }} (avg {{ data.avg_findings }} per review)</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card shadow-sm">
+      <div class="card-header fw-semibold">Findings by issue type</div>
+      <div class="card-body">
+        {% for t, c in data.types %}
+        <div class="mb-1"><span class="badge bg-secondary me-2">{{ t }}</span> {{ c }}</div>
+        {% else %}
+        <div class="text-muted small">No findings yet.</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-md-6">
+    <div class="card shadow-sm">
+      <div class="card-header fw-semibold">Reviews by brand profile</div>
+      <div class="card-body">
+        {% for name, c in data.profiles %}
+        <div class="mb-1"><strong>{{ name }}</strong>: {{ c }} review(s)</div>
+        {% else %}
+        <div class="text-muted small">No reviews yet.</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card shadow-sm">
+      <div class="card-header fw-semibold">Reviewer decisions</div>
+      <div class="card-body">
+        {% for k, v in data.reviewer.items() %}
+        <div class="mb-1"><span class="badge bg-info text-dark me-2">{{ k }}</span> {{ v }}</div>
+        {% else %}
+        <div class="text-muted small">No decisions recorded yet.</div>
+        {% endfor %}
+        <div class="mt-2 small text-muted">Finding statuses: {% for k, v in data.statuses.items() %}{{ k }}: {{ v }} {% endfor %}</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
