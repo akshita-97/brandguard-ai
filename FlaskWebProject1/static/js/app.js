@@ -1,6 +1,15 @@
 (function () {
   "use strict";
 
+  // Clean up lingering modal backdrops (Bootstrap 5 issue fix)
+  function cleanupBackdrops() {
+    document.querySelectorAll(".modal-backdrop").forEach(el => el.remove());
+    document.body.classList.remove("modal-open");
+    document.body.style.removeProperty("overflow");
+    document.body.style.removeProperty("padding-right");
+  }
+  document.addEventListener("hidden.bs.modal", cleanupBackdrops);
+
   const csrfToken = () => {
     const m = document.querySelector('meta[name="csrf-token"]');
     return m ? m.getAttribute("content") : "";
@@ -355,7 +364,10 @@
           });
         }
         document.getElementById("historyModalBody").innerHTML = html;
-        new bootstrap.Modal(document.getElementById("historyModal")).show();
+        const histModalEl = document.getElementById("historyModal");
+        let histModal = bootstrap.Modal.getInstance(histModalEl);
+        if (!histModal) histModal = new bootstrap.Modal(histModalEl);
+        histModal.show();
       } catch (e) {
         alert(e.message);
       }
@@ -371,7 +383,10 @@
           body: JSON.stringify({ decision, notes: notes.trim() })
         });
         if (msg) msg.innerHTML = `<span class="text-${decision === "approved" ? "success" : "danger"} fw-bold">Content ${decision} and recorded.</span>`;
-        setTimeout(() => viewReview(id), 800);
+        const histModalEl = document.getElementById("historyModal");
+        const histModal = bootstrap.Modal.getInstance(histModalEl);
+        if (histModal) histModal.hide();
+        setTimeout(() => viewReview(id), 900);
       } catch (e) {
         if (msg) msg.innerHTML = `<span class="text-danger">${escapeHtml(e.message)}</span>`;
       }
