@@ -304,6 +304,18 @@
         html += `<p><strong>Final decision:</strong> ${escapeHtml(r.final_decision || "—")}</p>`;
         if (r.final_notes) html += `<p><strong>Notes:</strong> ${escapeHtml(r.final_notes)}</p>`;
         html += `<div class="mb-2 small text-muted">Submitted: ${escapeHtml(r.created_at)}</div>`;
+        if (!r.final_decision) {
+          html += `<div class="mt-2 mb-3">
+            <textarea id="histNotes" class="form-control form-control-sm mb-2" rows="2" placeholder="Final reviewer notes (optional)"></textarea>
+            <div class="d-flex gap-2">
+              <button class="btn btn-sm btn-success" onclick="finalizeHistory(${id}, 'approved')">Approve</button>
+              <button class="btn btn-sm btn-danger" onclick="finalizeHistory(${id}, 'rejected')">Reject</button>
+            </div>
+            <div id="histFinalizeMsg" class="small mt-1"></div>
+          </div>`;
+        } else {
+          html += `<div class="alert alert-info small py-1">Final decision: <strong>${escapeHtml(r.final_decision)}</strong></div>`;
+        }
         html += `<hr><h6>Findings</h6>`;
         if (!data.findings || data.findings.length === 0) {
           html += `<p class="text-muted">No findings.</p>`;
@@ -329,6 +341,22 @@
         alert(e.message);
       }
     }
+
+    window.finalizeHistory = async function(id, decision) {
+      const notes = (document.getElementById("histNotes") || {}).value || "";
+      try {
+        await api(`/api/review/${id}/finalize`, {
+          method: "POST",
+          body: JSON.stringify({ decision, notes: notes.trim() })
+        });
+        const msg = document.getElementById("histFinalizeMsg");
+        if (msg) msg.textContent = decision === "approved" ? "Content approved and recorded." : "Content rejected and recorded.";
+        setTimeout(() => viewReview(id), 500);
+      } catch (e) {
+        const msg = document.getElementById("histFinalizeMsg");
+        if (msg) msg.textContent = e.message;
+      }
+    };
 
     document.getElementById("refreshHistory").addEventListener("click", loadHistory);
     loadHistory().then(() => {
