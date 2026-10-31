@@ -225,19 +225,27 @@
 
     async function sendDecision(decision) {
       if (currentReviewId === null) return;
-      const review = await api(`/api/review/${currentReviewId}`);
-      const dbFinding = review.findings[activeFindingIdx];
-      if (!dbFinding) throw new Error("Finding not found.");
-      const notes = document.getElementById("mNotes").value.trim();
-      await api(`/api/finding/${dbFinding.id}/decision`, {
-        method: "POST",
-        body: JSON.stringify({ decision, notes }),
-      });
-      const statusMap = { accepted: "Accepted", rejected: "Rejected", resolved: "Resolved", needs_review: "Needs Review" };
-      findingsState[activeFindingIdx].status = statusMap[decision];
-      const badge = document.getElementById(`status-${activeFindingIdx}`);
-      if (badge) badge.textContent = statusMap[decision];
-      findingModal.hide();
+      const btns = ["mAccept", "mReject", "mResolve", "mNeedsReview"].map(id => document.getElementById(id));
+      btns.forEach(b => { if (b) b.disabled = true; });
+      try {
+        const review = await api(`/api/review/${currentReviewId}`);
+        const dbFinding = review.findings[activeFindingIdx];
+        if (!dbFinding) throw new Error("Finding not found.");
+        const notes = document.getElementById("mNotes").value.trim();
+        await api(`/api/finding/${dbFinding.id}/decision`, {
+          method: "POST",
+          body: JSON.stringify({ decision, notes }),
+        });
+        const statusMap = { accepted: "Accepted", rejected: "Rejected", resolved: "Resolved", needs_review: "Needs Review" };
+        findingsState[activeFindingIdx].status = statusMap[decision];
+        const badge = document.getElementById(`status-${activeFindingIdx}`);
+        if (badge) badge.textContent = statusMap[decision];
+        findingModal.hide();
+      } catch (e) {
+        alert(e.message);
+      } finally {
+        btns.forEach(b => { if (b) b.disabled = false; });
+      }
     }
 
     document.getElementById("mAccept").addEventListener("click", () => sendDecision("accepted").catch((e) => alert(e.message)));
@@ -248,15 +256,26 @@
     async function finalize(decision) {
       if (currentReviewId === null) return;
       const notes = document.getElementById("finalNotes").value.trim();
+      const approveBtn = document.getElementById("approveBtn");
+      const rejectBtn = document.getElementById("rejectBtn");
+      const msgEl = document.getElementById("finalizeMsg");
+      approveBtn.disabled = true;
+      rejectBtn.disabled = true;
+      msgEl.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Processing...';
       try {
         await api(`/api/review/${currentReviewId}/finalize`, {
           method: "POST",
           body: JSON.stringify({ decision, notes }),
         });
-        document.getElementById("finalizeMsg").textContent =
-          decision === "approved" ? "Content approved and recorded." : "Content rejected and recorded.";
+        const color = decision === "approved" ? "success" : "danger";
+        const icon = decision === "approved" ? "check-circle" : "x-circle";
+        msgEl.innerHTML = `<span class="text-${color} fw-bold"><i class="bi bi-${icon} me-1"></i>Content ${decision} and recorded successfully.</span>`;
+        approveBtn.classList.add("disabled");
+        rejectBtn.classList.add("disabled");
       } catch (e) {
-        document.getElementById("finalizeMsg").textContent = e.message;
+        msgEl.innerHTML = `<span class="text-danger">${escapeHtml(e.message)}</span>`;
+        approveBtn.disabled = false;
+        rejectBtn.disabled = false;
       }
     }
   }
@@ -344,17 +363,17 @@
 
     window.finalizeHistory = async function(id, decision) {
       const notes = (document.getElementById("histNotes") || {}).value || "";
+      const msg = document.getElementById("histFinalizeMsg");
+      if (msg) msg.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Processing...';
       try {
         await api(`/api/review/${id}/finalize`, {
           method: "POST",
           body: JSON.stringify({ decision, notes: notes.trim() })
         });
-        const msg = document.getElementById("histFinalizeMsg");
-        if (msg) msg.textContent = decision === "approved" ? "Content approved and recorded." : "Content rejected and recorded.";
-        setTimeout(() => viewReview(id), 500);
+        if (msg) msg.innerHTML = `<span class="text-${decision === "approved" ? "success" : "danger"} fw-bold">Content ${decision} and recorded.</span>`;
+        setTimeout(() => viewReview(id), 800);
       } catch (e) {
-        const msg = document.getElementById("histFinalizeMsg");
-        if (msg) msg.textContent = e.message;
+        if (msg) msg.innerHTML = `<span class="text-danger">${escapeHtml(e.message)}</span>`;
       }
     };
 
