@@ -183,6 +183,29 @@
       const printBtn = document.getElementById("printBtn");
       if (printBtn) printBtn.addEventListener("click", () => window.print());
 
+      // Submit review (reviewer → approver)
+      const submitReviewBtn = document.getElementById("submitReviewBtn");
+      if (submitReviewBtn) {
+        submitReviewBtn.addEventListener("click", async () => {
+          if (currentReviewId === null) return;
+          const notes = document.getElementById("reviewNotes").value.trim();
+          const msgEl = document.getElementById("submitReviewMsg");
+          submitReviewBtn.disabled = true;
+          msgEl.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Submitting review...';
+          try {
+            await api(`/api/review/${currentReviewId}/submit-review`, {
+              method: "POST",
+              body: JSON.stringify({ notes }),
+            });
+            msgEl.innerHTML = '<span class="text-success fw-bold"><i class="bi bi-check-circle me-1"></i>Review submitted for approval.</span>';
+            submitReviewBtn.classList.add("disabled");
+          } catch (e) {
+            msgEl.innerHTML = `<span class="text-danger">${escapeHtml(e.message)}</span>`;
+            submitReviewBtn.disabled = false;
+          }
+        });
+      }
+
       // Visual brand check
       const visualBtn = document.getElementById("visualBtn");
       if (visualBtn) {
@@ -336,9 +359,11 @@
         const r = data.review;
         let html = `<p><strong>Profile:</strong> ${escapeHtml(data.profile_name)}</p>`;
         html += `<p><strong>Status:</strong> ${escapeHtml(r.overall_status)} &nbsp; <strong>Issues:</strong> ${r.total_issues}</p>`;
-        if (data.submitted_by) html += `<p class="small text-muted mb-1"><strong>Submitted by:</strong> ${escapeHtml(data.submitted_by)}</p>`;
+        if (data.submitted_by) html += `<p class="small text-muted mb-1"><strong>Submitted by (Author):</strong> ${escapeHtml(data.submitted_by)}</p>`;
+        if (r.review_notes) html += `<p class="small mb-1"><strong>Reviewer comments:</strong> ${escapeHtml(r.review_notes)}</p>`;
+        if (data.reviewed_by) html += `<p class="small text-muted mb-1"><strong>Reviewed by (Reviewer):</strong> ${escapeHtml(data.reviewed_by)}</p>`;
         html += `<p><strong>Final decision:</strong> ${escapeHtml(r.final_decision || "—")}</p>`;
-        if (data.decided_by) html += `<p class="small text-muted mb-1"><strong>Final decision by:</strong> ${escapeHtml(data.decided_by)}</p>`;
+        if (data.decided_by) html += `<p class="small text-muted mb-1"><strong>Final decision by (Approver):</strong> ${escapeHtml(data.decided_by)}</p>`;
         if (r.final_notes) html += `<p><strong>Notes:</strong> ${escapeHtml(r.final_notes)}</p>`;
         html += `<div class="mb-2 small text-muted">Submitted: ${escapeHtml(r.created_at)}</div>`;
         if (!r.final_decision) {

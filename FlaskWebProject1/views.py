@@ -210,6 +210,48 @@ def api_set_webhook(profile_id):
         conn.close()
 
 
+# ---------- Submit review (Reviewer → Approver) ----------
+@app.route("/api/review/<int:review_id>/submit-review", methods=["POST"])
+def api_submit_review(review_id):
+    payload = request.get_json(silent=True) or {}
+    notes = (payload.get("notes") or "").strip()
+    if len(notes) > 2000:
+        return _json_error("Notes too long.")
+
+    uid = session.get("user_id")
+    if uid:
+        user = get_user(uid)
+        if user and user.get("role") not in ("reviewer", "approver", "admin"):
+            return _json_error("Only users with 'reviewer' or 'approver' role can submit a review.", 403)
+
+    conn = get_connection()
+    try:
+        cur = conn.cursor()
+        cur.execute("SELECT id FROM reviews WHERE id = ?", (review_id,))
+        if not cur.fetchone():
+            return _json_error("Review not found.", 404)
+        cur.execute(
+            """UPDATE reviews SET reviewed_by = ?, review_notes = ?, reviewed_at = datetime('now')
+               WHERE id = ?""",
+            (uid, notes, review_id),
+        )
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        return _json_error(f"Failed: {str(e)}", 500)
+    finally:
+        conn.close()
+
+    if uid:
+        try:
+            add_notification(uid, "Review #{} submitted for approval.".format(review_id),
+                             "/history?review={}".format(review_id))
+        except Exception:
+            pass
+
+    return jsonify({"ok": True, "review_id": review_id, "reviewed_by": uid})
+
+
 # ---------- API ----------
 @app.route("/health")
 def health():
@@ -331,10 +373,16 @@ def api_get_review(review_id):
             su = conn.execute("SELECT username, display_name FROM users WHERE id = ?", (review["user_id"],)).fetchone()
             if su:
                 submitted_by_name = su["display_name"] or su["username"]
+        reviewed_by_name = None
+        if review["reviewed_by"]:
+            ru = conn.execute("SELECT username, display_name FROM users WHERE id = ?", (review["reviewed_by"],)).fetchone()
+            if ru:
+                reviewed_by_name = ru["display_name"] or ru["username"]
         return jsonify({
             "review": row_to_dict(review),
             "profile_name": profile["name"] if profile else "",
             "submitted_by": submitted_by_name,
+            "reviewed_by": reviewed_by_name,
             "decided_by": decided_by_name,
             "findings": [row_to_dict(f) for f in findings],
         })
