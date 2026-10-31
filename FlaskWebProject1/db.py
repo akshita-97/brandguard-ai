@@ -83,6 +83,7 @@ CREATE TABLE IF NOT EXISTS reviews (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     profile_id INTEGER NOT NULL,
     user_id INTEGER,
+    decided_by INTEGER,
     content TEXT NOT NULL,
     overall_status TEXT NOT NULL,
     total_issues INTEGER NOT NULL DEFAULT 0,
@@ -158,6 +159,7 @@ def _migrate(conn):
     migrations = [
         ("brand_profiles", "webhook_url", "TEXT"),
         ("reviews", "user_id", "INTEGER"),
+        ("reviews", "decided_by", "INTEGER"),
         ("brand_facts", "source_document", "TEXT"),
         ("brand_facts", "section", "TEXT"),
         ("brand_facts", "version", "TEXT DEFAULT '1.0'"),

@@ -289,10 +289,17 @@ def api_check():
         except Exception:
             pass
 
+    uid = session.get("user_id")
+    submitted_by_name = None
+    if uid:
+        su = get_user(uid)
+        if su:
+            submitted_by_name = su.get("display_name") or su.get("username")
     return jsonify({
         "review_id": review_id,
         "profile_id": profile_id,
         "profile_name": profile["profile"]["name"],
+        "submitted_by": submitted_by_name,
         "overall_status": result["overall_status"],
         "total_issues": result["total_issues"],
         "ai_used": ai_used,
@@ -314,9 +321,21 @@ def api_get_review(review_id):
         profile = conn.execute(
             "SELECT name FROM brand_profiles WHERE id = ?", (review["profile_id"],)
         ).fetchone()
+        decided_by_name = None
+        if review["decided_by"]:
+            du = conn.execute("SELECT username, display_name FROM users WHERE id = ?", (review["decided_by"],)).fetchone()
+            if du:
+                decided_by_name = du["display_name"] or du["username"]
+        submitted_by_name = None
+        if review["user_id"]:
+            su = conn.execute("SELECT username, display_name FROM users WHERE id = ?", (review["user_id"],)).fetchone()
+            if su:
+                submitted_by_name = su["display_name"] or su["username"]
         return jsonify({
             "review": row_to_dict(review),
             "profile_name": profile["name"] if profile else "",
+            "submitted_by": submitted_by_name,
+            "decided_by": decided_by_name,
             "findings": [row_to_dict(f) for f in findings],
         })
     finally:
@@ -333,6 +352,12 @@ def api_finding_decision(finding_id):
         return _json_error(f"Decision must be one of: {', '.join(sorted(allowed))}.")
     if len(notes) > 1000:
         return _json_error("Notes too long.")
+
+    uid = session.get("user_id")
+    if uid:
+        user = get_user(uid)
+        if user and user.get("role") not in ("reviewer", "approver", "admin"):
+            return _json_error("Only users with 'reviewer' or 'approver' role can review findings.", 403)
 
     conn = get_connection()
     try:
@@ -370,6 +395,13 @@ def api_finalize(review_id):
     if len(notes) > 2000:
         return _json_error("Notes too long.")
 
+    uid = session.get("user_id")
+    # Role enforcement: only approver role (or anonymous demo) can finalize
+    if uid:
+        user = get_user(uid)
+        if user and user.get("role") not in ("approver", "admin"):
+            return _json_error("Only users with the 'approver' role can make final decisions.", 403)
+
     conn = get_connection()
     webhook_url = None
     content = ""
@@ -380,9 +412,9 @@ def api_finalize(review_id):
         if not cur.fetchone():
             return _json_error("Review not found.", 404)
         cur.execute(
-            """UPDATE reviews SET final_decision = ?, final_notes = ?, decided_at = datetime('now')
+            """UPDATE reviews SET final_decision = ?, final_notes = ?, decided_at = datetime('now'), decided_by = ?
                WHERE id = ?""",
-            (decision, notes, review_id),
+            (decision, notes, uid, review_id),
         )
         conn.commit()
 

@@ -118,6 +118,13 @@
       document.getElementById("profileName").textContent = data.profile_name;
       document.getElementById("issueCount").textContent = data.total_issues;
       document.getElementById("aiUsed").textContent = data.ai_used ? "Yes" : "No";
+      const subLine = document.getElementById("submittedByLine");
+      if (data.submitted_by) {
+        document.getElementById("submittedBy").textContent = data.submitted_by;
+        subLine.style.display = "block";
+      } else {
+        subLine.style.display = "none";
+      }
 
       const counts = { critical: 0, high: 0, medium: 0, low: 0 };
       data.findings.forEach((f) => { if (counts[f.severity] !== undefined) counts[f.severity]++; });
@@ -329,7 +336,9 @@
         const r = data.review;
         let html = `<p><strong>Profile:</strong> ${escapeHtml(data.profile_name)}</p>`;
         html += `<p><strong>Status:</strong> ${escapeHtml(r.overall_status)} &nbsp; <strong>Issues:</strong> ${r.total_issues}</p>`;
+        if (data.submitted_by) html += `<p class="small text-muted mb-1"><strong>Submitted by:</strong> ${escapeHtml(data.submitted_by)}</p>`;
         html += `<p><strong>Final decision:</strong> ${escapeHtml(r.final_decision || "—")}</p>`;
+        if (data.decided_by) html += `<p class="small text-muted mb-1"><strong>Final decision by:</strong> ${escapeHtml(data.decided_by)}</p>`;
         if (r.final_notes) html += `<p><strong>Notes:</strong> ${escapeHtml(r.final_notes)}</p>`;
         html += `<div class="mb-2 small text-muted">Submitted: ${escapeHtml(r.created_at)}</div>`;
         if (!r.final_decision) {
