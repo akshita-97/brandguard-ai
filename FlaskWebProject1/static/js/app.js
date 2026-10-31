@@ -331,6 +331,10 @@
     }
 
     document.getElementById("refreshHistory").addEventListener("click", loadHistory);
-    loadHistory();
+    loadHistory().then(() => {
+      const params = new URLSearchParams(window.location.search);
+      const rid = params.get("review");
+      if (rid) viewReview(Number(rid));
+    });
   }
 })();

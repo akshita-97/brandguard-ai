@@ -285,7 +285,7 @@ def api_check():
     if uid:
         try:
             add_notification(uid, "Review #{} submitted: {} ({} issues).".format(review_id, result["overall_status"], result["total_issues"]),
-                             "/api/review/{}".format(review_id))
+                             "/history?review={}".format(review_id))
         except Exception:
             pass
 
@@ -404,7 +404,7 @@ def api_finalize(review_id):
     if uid:
         try:
             add_notification(uid, "Review #{} {}: {}".format(review_id, decision, profile_name),
-                             "/api/review/{}".format(review_id))
+                             "/history?review={}".format(review_id))
         except Exception:
             pass
 
