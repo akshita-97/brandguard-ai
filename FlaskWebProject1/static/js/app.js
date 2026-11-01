@@ -383,14 +383,26 @@
         if (r.final_notes) html += `<p><strong>Notes:</strong> ${escapeHtml(r.final_notes)}</p>`;
         html += `<div class="mb-2 small text-muted">Submitted: ${escapeHtml(r.created_at)}</div>`;
         if (!r.final_decision) {
-          html += `<div class="mt-2 mb-3">
-            <textarea id="histNotes" class="form-control form-control-sm mb-2" rows="2" placeholder="Final reviewer notes (optional)"></textarea>
-            <div class="d-flex gap-2">
-              <button class="btn btn-sm btn-success" onclick="finalizeHistory(${id}, 'approved')">Approve</button>
-              <button class="btn btn-sm btn-danger" onclick="finalizeHistory(${id}, 'rejected')">Reject</button>
-            </div>
-            <div id="histFinalizeMsg" class="small mt-1"></div>
-          </div>`;
+          const role = window.userRole || 'anonymous';
+          if (role === 'approver' || role === 'admin' || role === 'anonymous') {
+            html += `<div class="mt-2 mb-3">
+              <textarea id="histNotes" class="form-control form-control-sm mb-2" rows="2" placeholder="Final approver notes (optional)"></textarea>
+              <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-success" onclick="finalizeHistory(${id}, 'approved')">Approve</button>
+                <button class="btn btn-sm btn-danger" onclick="finalizeHistory(${id}, 'rejected')">Reject</button>
+              </div>
+              <div id="histFinalizeMsg" class="small mt-1"></div>
+            </div>`;
+          }
+          if (role === 'reviewer' || role === 'author' || role === 'anonymous') {
+            html += `<div class="mt-2 mb-3">
+              <textarea id="histReviewNotes" class="form-control form-control-sm mb-2" rows="2" placeholder="Reviewer comments (optional)"></textarea>
+              <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-primary" onclick="submitReviewHistory(${id})">Submit review</button>
+              </div>
+              <div id="histSubmitMsg" class="small mt-1"></div>
+            </div>`;
+          }
         } else {
           html += `<div class="alert alert-info small py-1">Final decision: <strong>${escapeHtml(r.final_decision)}</strong></div>`;
         }
@@ -422,6 +434,22 @@
         alert(e.message);
       }
     }
+
+    window.submitReviewHistory = async function(id) {
+      const notes = (document.getElementById("histReviewNotes") || {}).value || "";
+      const msg = document.getElementById("histSubmitMsg");
+      if (msg) msg.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Submitting...';
+      try {
+        await api(`/api/review/${id}/submit-review`, {
+          method: "POST",
+          body: JSON.stringify({ notes: notes.trim() })
+        });
+        if (msg) msg.innerHTML = '<span class="text-success fw-bold">Review submitted for approval.</span>';
+        setTimeout(() => viewReview(id), 800);
+      } catch (e) {
+        if (msg) msg.innerHTML = `<span class="text-danger">${escapeHtml(e.message)}</span>`;
+      }
+    };
 
     window.finalizeHistory = async function(id, decision) {
       const notes = (document.getElementById("histNotes") || {}).value || "";
