@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+{% block title %}Audit Log - BrandGuard AI{% endblock %}
+{% block content %}
+<div class="d-flex align-items-center mb-3">
+  <i class="bi bi-journal-check fs-3 text-primary me-2"></i>
+  <h2 class="mb-0 fw-bold">Audit Log</h2>
+  <span class="badge bg-secondary ms-2">Accountability</span>
+</div>
+<div class="alert alert-info small">
+  <i class="bi bi-info-circle me-1"></i>
+  Complete action history for all review decisions. Every finding decision and final approval is recorded with user, timestamp, and IP.
+</div>
+{% if logs %}
+<div class="card shadow-sm">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-sm mb-0">
+        <thead><tr><th>Time</th><th>Action</th><th>Review</th><th>User</th><th>Details</th></tr></thead>
+        <tbody>
+        {% for l in logs %}
+        <tr>
+          <td class="small text-muted">{{ l.created_at }}</td>
+          <td><span class="badge bg-secondary">{{ l.action }}</span></td>
+          <td>{% if l.review_id %}#{{ l.review_id }}{% else %}—{% endif %}</td>
+          <td>{% if l.user_id %}User #{{ l.user_id }}{% else %}Anonymous{% endif %}</td>
+          <td class="small">{{ l.details or '—' }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% else %}
+<div class="alert alert-info">No audit entries yet. Submit and review content to see the audit trail.</div>
+{% endif %}
+{% endblock %}

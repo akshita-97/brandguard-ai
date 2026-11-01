@@ -189,6 +189,17 @@
       document.getElementById("rejectBtn").onclick = () => finalize("rejected");
       const printBtn = document.getElementById("printBtn");
       if (printBtn) printBtn.addEventListener("click", () => window.print());
+      const dlBtn = document.getElementById("downloadReportBtn");
+      if (dlBtn) dlBtn.href = `/api/review/${data.review_id}/report`;
+      const recheckBtn = document.getElementById("recheckBtn");
+      if (recheckBtn) {
+        recheckBtn.addEventListener("click", () => {
+          // Re-run check on current content (user may have edited it)
+          const content = document.getElementById("contentInput").value.trim();
+          if (!content) { alert("No content to recheck."); return; }
+          document.getElementById("reviewForm").dispatchEvent(new Event("submit"));
+        });
+      }
 
       // Submit review (reviewer → approver)
       const submitReviewBtn = document.getElementById("submitReviewBtn");

@@ -129,12 +129,28 @@ CREATE TABLE IF NOT EXISTS notifications (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS audit_log (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    review_id INTEGER,
+    finding_id INTEGER,
+    user_id INTEGER,
+    action TEXT NOT NULL,
+    details TEXT,
+    ip_address TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    FOREIGN KEY (review_id) REFERENCES reviews(id) ON DELETE SET NULL,
+    FOREIGN KEY (finding_id) REFERENCES findings(id) ON DELETE SET NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+);
+
 CREATE INDEX IF NOT EXISTS idx_findings_review ON findings(review_id);
 CREATE INDEX IF NOT EXISTS idx_rules_profile ON brand_rules(profile_id);
 CREATE INDEX IF NOT EXISTS idx_facts_profile ON brand_facts(profile_id);
 CREATE INDEX IF NOT EXISTS idx_colors_profile ON brand_colors(profile_id);
 CREATE INDEX IF NOT EXISTS idx_assets_profile ON brand_assets(profile_id);
 CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id);
+CREATE INDEX IF NOT EXISTS idx_audit_review ON audit_log(review_id);
+CREATE INDEX IF NOT EXISTS idx_audit_user ON audit_log(user_id);
 """
 
 
@@ -411,6 +427,34 @@ def list_brand_assets(profile_id):
     conn = get_connection()
     try:
         rows = conn.execute("SELECT * FROM brand_assets WHERE profile_id = ? ORDER BY id", (profile_id,)).fetchall()
+        return [row_to_dict(r) for r in rows]
+    finally:
+        conn.close()
+
+
+def add_audit_log(review_id=None, finding_id=None, user_id=None, action="", details=None, ip_address=None):
+    conn = get_connection()
+    try:
+        conn.execute(
+            "INSERT INTO audit_log (review_id, finding_id, user_id, action, details, ip_address) VALUES (?,?,?,?,?,?)",
+            (review_id, finding_id, user_id, action, details, ip_address),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def list_audit_log(review_id=None, limit=50):
+    conn = get_connection()
+    try:
+        if review_id:
+            rows = conn.execute(
+                "SELECT * FROM audit_log WHERE review_id = ? ORDER BY id DESC LIMIT ?", (review_id, limit)
+            ).fetchall()
+        else:
+            rows = conn.execute(
+                "SELECT * FROM audit_log ORDER BY id DESC LIMIT ?", (limit,)
+            ).fetchall()
         return [row_to_dict(r) for r in rows]
     finally:
         conn.close()

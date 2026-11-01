@@ -22,6 +22,10 @@ class Config:
     MAX_CONTENT_LENGTH = 100_000
     CONTENT_MAX_CHARS = 10_000
 
+    # Session expiration (30 minutes)
+    from datetime import timedelta
+    PERMANENT_SESSION_LIFETIME = timedelta(minutes=30)
+
     AI_API_KEY = os.environ.get("AI_API_KEY", "").strip()
     AI_API_BASE = os.environ.get("AI_API_BASE", "https://api.openai.com/v1").rstrip("/")
     AI_MODEL = os.environ.get("AI_MODEL", "gpt-4o-mini")

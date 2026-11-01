@@ -7,7 +7,7 @@ import secrets
 from datetime import datetime
 
 from flask import (
-    Flask, render_template, request, jsonify, session, abort, redirect, url_for,
+    Flask, render_template, request, jsonify, session, abort, redirect, url_for, Response,
 )
 
 from FlaskWebProject1 import app
@@ -15,7 +15,7 @@ from FlaskWebProject1.config import Config
 from FlaskWebProject1.db import (get_connection, row_to_dict, list_profiles,
     create_user, get_user, verify_user, get_user_by_username, list_users,
     add_notification, list_notifications, unread_notification_count, get_analytics,
-    list_brand_colors, list_brand_assets)
+    list_brand_colors, list_brand_assets, add_audit_log, list_audit_log)
 from FlaskWebProject1.engine import check_content, load_profile
 from FlaskWebProject1.ai_service import enhance, is_enabled
 from FlaskWebProject1.visual_service import check_image
@@ -120,6 +120,7 @@ def register():
             return _json_error("Username already taken.")
         return render_template("register.html", title="Register", year=datetime.now().year, error="Username already taken. Please choose another.")
     session["user_id"] = uid
+    session.permanent = True
     if request.is_json:
         return jsonify({"ok": True, "user_id": uid, "username": username, "role": role})
     return redirect(url_for("home"))
@@ -138,6 +139,7 @@ def login():
             return _json_error("Invalid username or password.", 401)
         return render_template("login.html", title="Login", year=datetime.now().year, error="Invalid username or password. Please try again.")
     session["user_id"] = user["id"]
+    session.permanent = True
     if request.is_json:
         return jsonify({"ok": True, "user_id": user["id"], "username": user["username"], "role": user["role"]})
     return redirect(url_for("home"))
@@ -161,7 +163,6 @@ def notifications_page():
     uid = session.get("user_id")
     notifs = list_notifications(uid) if uid else []
     if uid:
-        # mark all read
         conn = get_connection()
         try:
             conn.execute("UPDATE notifications SET is_read = 1 WHERE user_id = ?", (uid,))
@@ -169,6 +170,12 @@ def notifications_page():
         finally:
             conn.close()
     return render_template("notifications.html", title="Notifications", notifications=notifs, year=datetime.now().year)
+
+
+@app.route("/audit")
+def audit_page():
+    logs = list_audit_log(limit=50)
+    return render_template("audit.html", title="Audit Log", logs=logs, year=datetime.now().year)
 
 
 @app.route("/api/notifications")
@@ -260,6 +267,74 @@ def api_submit_review(review_id):
 @app.route("/health")
 def health():
     return jsonify({"status": "ok", "ai_enabled": is_enabled()})
+
+
+@app.route("/api/review/<int:review_id>/report")
+def api_review_report(review_id):
+    conn = get_connection()
+    try:
+        review = conn.execute("SELECT * FROM reviews WHERE id = ?", (review_id,)).fetchone()
+        if not review:
+            return _json_error("Review not found.", 404)
+        findings = conn.execute("SELECT * FROM findings WHERE review_id = ? ORDER BY id", (review_id,)).fetchall()
+        profile = conn.execute("SELECT name FROM brand_profiles WHERE id = ?", (review["profile_id"],)).fetchone()
+        decided_by = None
+        if review["decided_by"]:
+            du = conn.execute("SELECT username, display_name FROM users WHERE id = ?", (review["decided_by"],)).fetchone()
+            if du:
+                decided_by = du["display_name"] or du["username"]
+        lines = []
+        lines.append("=" * 60)
+        lines.append("BRANDGUARD AI — REVIEW REPORT")
+        lines.append("=" * 60)
+        lines.append("Review ID: {}".format(review["id"]))
+        lines.append("Brand Profile: {}".format(profile["name"] if profile else "Unknown"))
+        lines.append("Submitted: {}".format(review["created_at"]))
+        lines.append("Overall Status: {}".format(review["overall_status"]))
+        lines.append("Total Issues: {}".format(review["total_issues"]))
+        lines.append("Compliance Score: {}/100".format(review["compliance_score"] if review["compliance_score"] is not None else "N/A"))
+        lines.append("AI Used: {}".format("Yes" if review["ai_used"] else "No"))
+        lines.append("Final Decision: {}".format(review["final_decision"] or "Pending"))
+        if decided_by:
+            lines.append("Final Decision By: {}".format(decided_by))
+        if review["final_notes"]:
+            lines.append("Final Notes: {}".format(review["final_notes"]))
+        lines.append("")
+        lines.append("-" * 60)
+        lines.append("FINDINGS")
+        lines.append("-" * 60)
+        for i, f in enumerate(findings, 1):
+            lines.append("")
+            lines.append("Finding #{}: {}".format(i, f["issue_type"].upper()))
+            lines.append("  Severity: {}".format(f["severity"]))
+            lines.append("  Confidence: {}".format(f["confidence"] or "medium"))
+            lines.append("  Status: {}".format(f["status"]))
+            lines.append("  Original: {}".format(f["original_text"]))
+            lines.append("  Explanation: {}".format(f["explanation"]))
+            if f["rule_reference"]:
+                lines.append("  Rule: {}".format(f["rule_reference"]))
+            if f["citation"]:
+                lines.append("  Source: {}".format(f["citation"]))
+            if f["suggested_correction"]:
+                lines.append("  Suggestion: {}".format(f["suggested_correction"]))
+            if f["reviewer_decision"]:
+                lines.append("  Reviewer Decision: {}".format(f["reviewer_decision"]))
+            if f["reviewer_notes"]:
+                lines.append("  Reviewer Notes: {}".format(f["reviewer_notes"]))
+        lines.append("")
+        lines.append("=" * 60)
+        lines.append("AUDIT TRAIL")
+        lines.append("=" * 60)
+        logs = conn.execute("SELECT * FROM audit_log WHERE review_id = ? ORDER BY id", (review_id,)).fetchall()
+        for l in logs:
+            lines.append("[{}] {} - {}".format(l["created_at"], l["action"], l["details"] or ""))
+        lines.append("")
+        lines.append("End of report.")
+        report = "\n".join(lines)
+        return Response(report, mimetype="text/plain",
+                        headers={"Content-Disposition": "attachment; filename=review_{}_report.txt".format(review_id)})
+    finally:
+        conn.close()
 
 
 @app.route("/api/profiles", methods=["GET"])
@@ -407,6 +482,10 @@ def api_finding_decision(finding_id):
     if len(notes) > 1000:
         return _json_error("Notes too long.")
 
+    # Require reason when rejecting
+    if decision == "rejected" and not notes:
+        return _json_error("A reason is required when rejecting a finding.")
+
     uid = session.get("user_id")
     if uid:
         user = get_user(uid)
@@ -431,6 +510,12 @@ def api_finding_decision(finding_id):
             (decision, notes, status_map[decision], finding_id),
         )
         conn.commit()
+        try:
+            add_audit_log(review_id=None, finding_id=finding_id, user_id=uid, action="finding_decision",
+                          details="Decision: {} | Notes: {}".format(decision, notes[:200] if notes else "(none)"),
+                          ip_address=request.remote_addr)
+        except Exception:
+            pass
         return jsonify({"ok": True, "finding_id": finding_id, "decision": decision, "status": status_map[decision]})
     except Exception as e:
         conn.rollback()
@@ -462,9 +547,23 @@ def api_finalize(review_id):
     profile_name = ""
     try:
         cur = conn.cursor()
-        cur.execute("SELECT id FROM reviews WHERE id = ?", (review_id,))
-        if not cur.fetchone():
+        cur.execute("SELECT id, final_decision FROM reviews WHERE id = ?", (review_id,))
+        review_row = cur.fetchone()
+        if not review_row:
             return _json_error("Review not found.", 404)
+        # Prevent duplicate approval
+        if review_row["final_decision"] is not None:
+            return _json_error("This review has already been finalized as '{}'. Cannot change.".format(review_row["final_decision"]), 409)
+
+        # Prevent approval if critical findings remain unresolved
+        if decision == "approved":
+            crit = conn.execute(
+                "SELECT COUNT(*) FROM findings WHERE review_id = ? AND severity = 'critical' AND status NOT IN ('Resolved','Accepted')",
+                (review_id,),
+            ).fetchone()[0]
+            if crit > 0:
+                return _json_error("Cannot approve: {} critical finding(s) remain unresolved. Resolve or reject them first.".format(crit), 400)
+
         cur.execute(
             """UPDATE reviews SET final_decision = ?, final_notes = ?, decided_at = datetime('now'), decided_by = ?
                WHERE id = ?""",
@@ -493,6 +592,12 @@ def api_finalize(review_id):
                              "/history?review={}".format(review_id))
         except Exception:
             pass
+    try:
+        add_audit_log(review_id=review_id, user_id=uid, action="final_decision",
+                      details="Decision: {} | Notes: {}".format(decision, notes[:200] if notes else "(none)"),
+                      ip_address=request.remote_addr)
+    except Exception:
+        pass
 
     if decision == "approved" and webhook_url:
         try:
@@ -634,6 +739,11 @@ def api_extract_facts():
 
 
 # ---------- Error handlers ----------
+@app.errorhandler(403)
+def _forbidden(e):
+    if request.path.startswith("/api/"):
+        return jsonify({"error": getattr(e, "description", "Forbidden")}), 403
+    return render_template("error.html", title="Access Denied", message=getattr(e, "description", "You do not have permission to perform this action."), year=datetime.now().year), 403
 @app.errorhandler(400)
 def _bad_request(e):
     if request.path.startswith("/api/"):
