@@ -18,26 +18,26 @@
     </div>
   </div>
   <div class="col-md-3">
-    <div class="card text-center shadow-sm clickable-stat" data-filter="approved" style="cursor:pointer;">
+    <div class="card text-center shadow-sm clickable-stat" data-filter="reviews:approved" style="cursor:pointer;">
       <div class="card-body">
         <div class="fs-2 fw-bold text-success">{{ data.approved }}</div>
-        <div class="small text-muted">Approved</div>
+        <div class="small text-muted">Approved reviews</div>
       </div>
     </div>
   </div>
   <div class="col-md-3">
-    <div class="card text-center shadow-sm clickable-stat" data-filter="rejected" style="cursor:pointer;">
+    <div class="card text-center shadow-sm clickable-stat" data-filter="reviews:rejected" style="cursor:pointer;">
       <div class="card-body">
         <div class="fs-2 fw-bold text-danger">{{ data.rejected }}</div>
-        <div class="small text-muted">Rejected</div>
+        <div class="small text-muted">Rejected reviews</div>
       </div>
     </div>
   </div>
   <div class="col-md-3">
-    <div class="card text-center shadow-sm clickable-stat" data-filter="pending" style="cursor:pointer;">
+    <div class="card text-center shadow-sm clickable-stat" data-filter="reviews:pending" style="cursor:pointer;">
       <div class="card-body">
         <div class="fs-2 fw-bold text-warning">{{ data.pending }}</div>
-        <div class="small text-muted">Pending decision</div>
+        <div class="small text-muted">Pending reviews</div>
       </div>
     </div>
   </div>
@@ -132,15 +132,20 @@
   document.querySelectorAll('.clickable-stat').forEach(el => {
     el.addEventListener('click', async () => {
       const filter = el.dataset.filter;
-      let url = '/api/findings?limit=100';
-      let title = 'Findings';
-      if (filter === 'all') { title = 'All findings'; }
-      else if (filter === 'approved') { url += '&status=Accepted'; title = 'Accepted findings'; }
-      else if (filter === 'rejected') { url += '&status=Rejected'; title = 'Rejected findings'; }
-      else if (filter === 'pending') { url += '&status=Needs+Review'; title = 'Pending findings'; }
-      else if (filter.startsWith('severity:')) { url += '&severity=' + filter.split(':')[1]; title = filter.split(':')[1] + ' severity findings'; }
-      else if (filter.startsWith('type:')) { url += '&issue_type=' + encodeURIComponent(filter.split(':')[1]); title = filter.split(':')[1] + ' findings'; }
-      else if (filter.startsWith('decision:')) { url += '&reviewer_decision=' + filter.split(':')[1]; title = filter.split(':')[1] + ' decisions'; }
+      let url, title;
+      let isReview = filter.startsWith('reviews:');
+      if (isReview) {
+        const status = filter.split(':')[1];
+        url = '/api/reviews?limit=100&final_decision=' + status;
+        title = status.charAt(0).toUpperCase() + status.slice(1) + ' reviews';
+      } else {
+        url = '/api/findings?limit=100';
+        title = 'Findings';
+        if (filter === 'all') { title = 'All findings'; }
+        else if (filter.startsWith('severity:')) { url += '&severity=' + filter.split(':')[1]; title = filter.split(':')[1] + ' severity findings'; }
+        else if (filter.startsWith('type:')) { url += '&issue_type=' + encodeURIComponent(filter.split(':')[1]); title = filter.split(':')[1] + ' findings'; }
+        else if (filter.startsWith('decision:')) { url += '&reviewer_decision=' + filter.split(':')[1]; title = filter.split(':')[1] + ' decisions'; }
+      }
 
       document.getElementById('findingsModalTitle').textContent = title;
       document.getElementById('findingsModalBody').innerHTML = '<div class="text-muted">Loading...</div>';
@@ -149,24 +154,41 @@
       try {
         const res = await fetch(url);
         const data = await res.json();
-        if (!data.findings.length) {
-          document.getElementById('findingsModalBody').innerHTML = '<div class="text-muted">No findings match this filter.</div>';
-          return;
+        if (isReview) {
+          if (!data.reviews.length) {
+            document.getElementById('findingsModalBody').innerHTML = '<div class="text-muted">No reviews match this filter.</div>';
+            return;
+          }
+          let html = '<div class="small text-muted mb-2">' + data.count + ' review(s)</div>';
+          data.reviews.forEach(r => {
+            html += '<div class="border rounded p-2 mb-2">';
+            html += '<div class="mb-1"><strong>Review #' + r.id + '</strong> — ' + (r.profile_name || 'Unknown') + '</div>';
+            html += '<div class="small">Status: ' + r.overall_status + ' | Issues: ' + r.total_issues + '</div>';
+            html += '<div class="small">Final decision: ' + (r.final_decision || 'Pending') + '</div>';
+            html += '<div class="small text-muted">Created: ' + r.created_at + '</div>';
+            html += '</div>';
+          });
+          document.getElementById('findingsModalBody').innerHTML = html;
+        } else {
+          if (!data.findings.length) {
+            document.getElementById('findingsModalBody').innerHTML = '<div class="text-muted">No findings match this filter.</div>';
+            return;
+          }
+          let html = '<div class="small text-muted mb-2">' + data.count + ' finding(s)</div>';
+          data.findings.forEach(f => {
+            html += '<div class="border rounded p-2 mb-2">';
+            html += '<div class="mb-1"><span class="badge bg-secondary">' + f.issue_type + '</span> ';
+            html += '<span class="badge bg-' + (f.severity==='critical'?'danger':f.severity==='high'?'warning text-dark':f.severity==='medium'?'info text-dark':'secondary') + '">' + f.severity + '</span>';
+            html += ' <span class="badge bg-light text-dark border ms-1">' + f.status + '</span>';
+            if (f.reviewer_decision) html += ' <span class="badge bg-info text-dark ms-1">' + f.reviewer_decision + '</span>';
+            html += '</div>';
+            html += '<div class="finding-original mb-1" style="font-size:.8rem;">' + f.original_text.replace(/</g,'&lt;') + '</div>';
+            html += '<div class="small">' + f.explanation + '</div>';
+            if (f.suggested_correction) html += '<div class="small mt-1"><strong>Suggestion:</strong> ' + f.suggested_correction + '</div>';
+            html += '</div>';
+          });
+          document.getElementById('findingsModalBody').innerHTML = html;
         }
-        let html = '<div class="small text-muted mb-2">' + data.count + ' finding(s)</div>';
-        data.findings.forEach(f => {
-          html += '<div class="border rounded p-2 mb-2">';
-          html += '<div class="mb-1"><span class="badge bg-secondary">' + f.issue_type + '</span> ';
-          html += '<span class="badge bg-' + (f.severity==='critical'?'danger':f.severity==='high'?'warning text-dark':f.severity==='medium'?'info text-dark':'secondary') + '">' + f.severity + '</span>';
-          html += ' <span class="badge bg-light text-dark border ms-1">' + f.status + '</span>';
-          if (f.reviewer_decision) html += ' <span class="badge bg-info text-dark ms-1">' + f.reviewer_decision + '</span>';
-          html += '</div>';
-          html += '<div class="finding-original mb-1" style="font-size:.8rem;">' + f.original_text.replace(/</g,'&lt;') + '</div>';
-          html += '<div class="small">' + f.explanation + '</div>';
-          if (f.suggested_correction) html += '<div class="small mt-1"><strong>Suggestion:</strong> ' + f.suggested_correction + '</div>';
-          html += '</div>';
-        });
-        document.getElementById('findingsModalBody').innerHTML = html;
       } catch (e) {
         document.getElementById('findingsModalBody').innerHTML = '<div class="text-danger">Error: ' + e.message + '</div>';
       }

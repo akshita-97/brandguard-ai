@@ -307,6 +307,37 @@ def api_findings():
         conn.close()
 
 
+@app.route("/api/reviews")
+def api_reviews():
+    """Return reviews filtered by optional query params."""
+    final_decision = request.args.get("final_decision")
+    profile_id = request.args.get("profile_id", type=int)
+    limit = request.args.get("limit", default=50, type=int)
+    limit = max(1, min(limit, 200))
+
+    conn = get_connection()
+    try:
+        q = """SELECT r.*, p.name AS profile_name
+               FROM reviews r LEFT JOIN brand_profiles p ON p.id = r.profile_id
+               WHERE 1=1"""
+        params = []
+        if final_decision == "approved":
+            q += " AND r.final_decision = 'approved'"
+        elif final_decision == "rejected":
+            q += " AND r.final_decision = 'rejected'"
+        elif final_decision == "pending":
+            q += " AND r.final_decision IS NULL"
+        if profile_id:
+            q += " AND r.profile_id = ?"
+            params.append(profile_id)
+        q += " ORDER BY r.id DESC LIMIT ?"
+        params.append(limit)
+        rows = conn.execute(q, params).fetchall()
+        return jsonify({"reviews": [row_to_dict(r) for r in rows], "count": len(rows)})
+    finally:
+        conn.close()
+
+
 @app.route("/api/review/<int:review_id>/report")
 def api_review_report(review_id):
     conn = get_connection()
