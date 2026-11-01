@@ -302,7 +302,16 @@ def api_findings():
         q += " ORDER BY f.id DESC LIMIT ?"
         params.append(limit)
         rows = conn.execute(q, params).fetchall()
-        return jsonify({"findings": [row_to_dict(r) for r in rows], "count": len(rows)})
+        # Get total count without limit
+        count_q = q.replace(" ORDER BY f.id DESC LIMIT ?", "").replace(" ORDER BY f.id DESC LIMIT ? ", "")
+        # Simpler: just count all matching
+        total = conn.execute("SELECT COUNT(*) FROM findings f JOIN reviews r ON r.id = f.review_id WHERE 1=1" +
+            (" AND f.severity = ?" if severity else "") +
+            (" AND f.issue_type = ?" if issue_type else "") +
+            (" AND f.status = ?" if status else "") +
+            (" AND f.reviewer_decision = ?" if reviewer_decision else ""),
+            [p for p in [severity, issue_type, status, reviewer_decision] if p]).fetchone()[0]
+        return jsonify({"findings": [row_to_dict(r) for r in rows], "count": len(rows), "total": total})
     finally:
         conn.close()
 

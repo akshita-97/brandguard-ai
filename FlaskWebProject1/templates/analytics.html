@@ -60,7 +60,7 @@
         <div class="mb-2 clickable-stat" data-filter="severity:low" style="cursor:pointer;">
           <span class="badge bg-secondary me-2">low</span> {{ data.severity.get('low', 0) }}
         </div>
-        <div class="mt-2 small text-muted">Total findings: {{ data.total_findings }} (avg {{ data.avg_findings }} per review)</div>
+        <div class="mt-2 small text-muted">Total findings: {{ data.total_findings }} (avg {{ data.avg_findings }} per review). Each review can generate multiple findings.</div>
       </div>
     </div>
   </div>
@@ -139,7 +139,7 @@
         url = '/api/reviews?limit=100&final_decision=' + status;
         title = status.charAt(0).toUpperCase() + status.slice(1) + ' reviews';
       } else {
-        url = '/api/findings?limit=100';
+        url = '/api/findings?limit=500';
         title = 'Findings';
         if (filter === 'all') { title = 'All findings'; }
         else if (filter.startsWith('severity:')) { url += '&severity=' + filter.split(':')[1]; title = filter.split(':')[1] + ' severity findings'; }
@@ -174,7 +174,7 @@
             document.getElementById('findingsModalBody').innerHTML = '<div class="text-muted">No findings match this filter.</div>';
             return;
           }
-          let html = '<div class="small text-muted mb-2">' + data.count + ' finding(s)</div>';
+          let html = '<div class="small text-muted mb-2">' + data.count + ' of ' + data.total + ' finding(s) shown' + (data.count < data.total ? ' (increase limit to see more)' : '') + '</div>';
           data.findings.forEach(f => {
             html += '<div class="border rounded p-2 mb-2">';
             html += '<div class="mb-1"><span class="badge bg-secondary">' + f.issue_type + '</span> ';
