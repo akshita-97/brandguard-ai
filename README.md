@@ -169,7 +169,7 @@ The new profile, rules, facts, colours, and logo dimension rules appear in the a
 - [x] Optional AI assistance with safe fallback
 - [x] CSRF, validation, parameterized queries, output escaping
 - [x] Responsive UI, loading states, error messages
-- [x] Automated tests (17 passing)
+- [x] Automated tests (17 passing: 8 engine + 9 route, including end-to-end workflow and persistence)
 - [x] Public deployment (PythonAnywhere)
 - [x] README, submission doc, demo script
 - [x] Evidence-backed findings with source citation and confidence (Round 3)

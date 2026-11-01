@@ -55,6 +55,14 @@
           Issues: <strong id="issueCount">0</strong> &nbsp;|&nbsp;
           AI used: <strong id="aiUsed">No</strong>
         </div>
+        <div class="mb-3 d-flex align-items-center gap-2">
+          <span class="fw-bold">Brand Compliance Score:</span>
+          <span id="complianceScore" class="fs-4 fw-bold text-primary">100</span>
+          <span class="text-muted small">/ 100</span>
+          <div class="progress flex-grow-1" style="height:8px;">
+            <div id="scoreBar" class="progress-bar bg-success" role="progressbar" style="width:100%"></div>
+          </div>
+        </div>
         <div class="mb-2 small text-muted" id="submittedByLine" style="display:none;">
           Submitted by: <strong id="submittedBy"></strong>
         </div>
@@ -89,13 +97,28 @@
         <div class="small text-muted mt-2">
           <i class="bi bi-info-circle me-1"></i>
           <strong>Workflow:</strong> Author submits content → Reviewer reviews findings and submits review → Approver makes final approve/reject decision.
-          Roles are stored but not strictly enforced in the demo (anonymous users can do everything).
+          Roles are enforced for logged-in users (reviewer cannot finalize, author cannot review). Anonymous demo mode allows all actions for testing.
         </div>
       </div>
     </div>
   </div>
 
   <div class="col-lg-5">
+    <div class="card shadow-sm">
+      <div class="card-header fw-semibold"><i class="bi bi-question-circle me-1"></i>How to test (for judges)</div>
+      <div class="card-body small">
+        <ol class="mb-2">
+          <li>Click <strong>Load sample content</strong> → <strong>Check Content</strong>.</li>
+          <li>See "Needs Review (High Priority)" with findings.</li>
+          <li>Click <strong>Review</strong> on any finding → read explanation, rule, citation, suggestion.</li>
+          <li>Click <strong>Accept</strong> / <strong>Reject</strong> / <strong>Resolve</strong>.</li>
+          <li>Click <strong>Approve content</strong> or <strong>Reject content</strong>.</li>
+          <li>Go to <strong>History</strong> → click <strong>View</strong> → decisions are saved.</li>
+          <li>Upload an image in <strong>Visual brand check</strong> → see colour/dimension/format checks.</li>
+          <li>Register/login → see notifications and analytics.</li>
+        </ol>
+      </div>
+    </div>
     <div class="card shadow-sm">
       <div class="card-header fw-semibold">How it works</div>
       <div class="card-body small">
@@ -148,17 +171,20 @@
       <div class="modal-body">
         <p><strong>Issue type:</strong> <span id="mType"></span> &nbsp; <strong>Severity:</strong> <span id="mSeverity"></span>
           &nbsp; <strong>Confidence:</strong> <span id="mConfidence"></span></p>
-        <div class="mb-2">
-          <div class="small text-muted mb-1">Original text</div>
-          <div class="finding-original" id="mOriginal"></div>
+        <div class="row g-2 mb-2">
+          <div class="col-md-6">
+            <div class="small text-muted mb-1"><i class="bi bi-x-circle text-danger me-1"></i>Original text</div>
+            <div class="finding-original border-danger" id="mOriginal"></div>
+          </div>
+          <div class="col-md-6">
+            <div class="small text-muted mb-1"><i class="bi bi-check-circle text-success me-1"></i>Suggested correction</div>
+            <div class="finding-original" style="background:#ecfdf5;border-color:#a7f3d0;" id="mSuggestion"></div>
+          </div>
         </div>
         <p><strong>Explanation:</strong> <span id="mExplanation"></span></p>
         <p><strong>Rule / fact:</strong> <span id="mRule"></span></p>
         <p><strong>Source / citation:</strong> <span id="mCitation" class="text-primary"></span></p>
-        <div class="mb-2">
-          <div class="small text-muted mb-1">Suggested correction</div>
-          <div class="finding-original" style="background:#ecfdf5;border-color:#a7f3d0;" id="mSuggestion"></div>
-        </div>
+        <p><strong>Confidence:</strong> <span id="mConfidence"></span></p>
         <div class="mb-2">
           <label for="mNotes" class="form-label">Reviewer notes</label>
           <textarea id="mNotes" class="form-control" rows="2"></textarea>

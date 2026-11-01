@@ -34,7 +34,7 @@ BrandGuard AI is a brand-governance web app. A user pastes content, selects a br
 - Database: SQLite.
 - Content checking: Python rule engine (deterministic, regex + keyword + fact matching).
 - AI: Optional external LLM via OpenAI-compatible API (requests + python-dotenv).
-- Testing: pytest (17 tests).
+- Testing: pytest (17 tests: 8 engine + 9 route, including end-to-end workflow and persistence).
 - Deployment: PythonAnywhere (free tier, persistent disk).
 
 ## 6. Implementation details

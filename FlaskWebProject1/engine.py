@@ -265,8 +265,26 @@ def check_content(profile_id: int, content: str) -> Dict[str, Any]:
         else:
             overall = "Needs Review"
 
+    # Brand compliance score (0-100)
+    score = 100
+    for f in findings:
+        sev = f.get("severity", "low")
+        if sev == "critical":
+            score -= 25
+        elif sev == "high":
+            score -= 15
+        elif sev == "medium":
+            score -= 8
+        elif sev == "low":
+            score -= 3
+    score = max(0, score)
+    # Cap: if any critical issue, max 50
+    if any(f.get("severity") == "critical" for f in findings):
+        score = min(score, 50)
+
     return {
         "overall_status": overall,
         "total_issues": len(findings),
         "findings": findings,
+        "compliance_score": score,
     }

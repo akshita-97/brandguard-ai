@@ -299,9 +299,10 @@ def api_check():
         cur = conn.cursor()
         uid = session.get("user_id")
         cur.execute(
-            """INSERT INTO reviews (profile_id, user_id, content, overall_status, total_issues, ai_used)
-               VALUES (?,?,?,?,?,?)""",
-            (profile_id, uid, content, result["overall_status"], result["total_issues"], 1 if ai_used else 0),
+            """INSERT INTO reviews (profile_id, user_id, content, overall_status, total_issues, ai_used, compliance_score)
+               VALUES (?,?,?,?,?,?,?)""",
+            (profile_id, uid, content, result["overall_status"], result["total_issues"], 1 if ai_used else 0,
+             result.get("compliance_score", 100)),
         )
         review_id = cur.lastrowid
         for f in result["findings"]:
@@ -344,6 +345,7 @@ def api_check():
         "submitted_by": submitted_by_name,
         "overall_status": result["overall_status"],
         "total_issues": result["total_issues"],
+        "compliance_score": result.get("compliance_score", 100),
         "ai_used": ai_used,
         "findings": result["findings"],
         "created_at": datetime.now().isoformat(timespec="seconds"),

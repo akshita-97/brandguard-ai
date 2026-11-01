@@ -118,6 +118,13 @@
       document.getElementById("profileName").textContent = data.profile_name;
       document.getElementById("issueCount").textContent = data.total_issues;
       document.getElementById("aiUsed").textContent = data.ai_used ? "Yes" : "No";
+      const score = data.compliance_score || 100;
+      const scoreEl = document.getElementById("complianceScore");
+      const scoreBar = document.getElementById("scoreBar");
+      scoreEl.textContent = score;
+      scoreEl.className = "fs-4 fw-bold " + (score >= 80 ? "text-success" : score >= 50 ? "text-warning" : "text-danger");
+      scoreBar.style.width = score + "%";
+      scoreBar.className = "progress-bar " + (score >= 80 ? "bg-success" : score >= 50 ? "bg-warning" : "bg-danger");
       const subLine = document.getElementById("submittedByLine");
       if (data.submitted_by) {
         document.getElementById("submittedBy").textContent = data.submitted_by;
