@@ -23,4 +23,26 @@
     </div>
   </div>
 </div>
+
+<!-- Invalid credentials popup -->
+{% if error %}
+<div class="modal fade show" id="errorModal" tabindex="-1" style="display:block; background:rgba(0,0,0,0.5);" aria-modal="true" role="dialog">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title"><i class="bi bi-exclamation-triangle me-2"></i>Login Failed</h5>
+      </div>
+      <div class="modal-body text-center">
+        <p class="mb-2">{{ error }}</p>
+        <p class="text-muted small">Please check your username and password and try again.</p>
+      </div>
+      <div class="modal-footer justify-content-center">
+        <button type="button" class="btn btn-primary" onclick="document.getElementById('errorModal').style.display='none';">
+          <i class="bi bi-arrow-left me-1"></i>Re-enter password
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
 {% endblock %}

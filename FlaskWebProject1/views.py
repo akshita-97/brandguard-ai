@@ -116,7 +116,9 @@ def register():
         role = "author"
     uid = create_user(username, password, role)
     if not uid:
-        return _json_error("Username already taken.")
+        if request.is_json:
+            return _json_error("Username already taken.")
+        return render_template("register.html", title="Register", year=datetime.now().year, error="Username already taken. Please choose another.")
     session["user_id"] = uid
     if request.is_json:
         return jsonify({"ok": True, "user_id": uid, "username": username, "role": role})
@@ -132,7 +134,9 @@ def login():
     password = (data.get("password") or "").strip()
     user = verify_user(username, password)
     if not user:
-        return _json_error("Invalid username or password.", 401)
+        if request.is_json:
+            return _json_error("Invalid username or password.", 401)
+        return render_template("login.html", title="Login", year=datetime.now().year, error="Invalid username or password. Please try again.")
     session["user_id"] = user["id"]
     if request.is_json:
         return jsonify({"ok": True, "user_id": user["id"], "username": user["username"], "role": user["role"]})

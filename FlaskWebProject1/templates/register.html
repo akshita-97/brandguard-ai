@@ -31,4 +31,24 @@
     </div>
   </div>
 </div>
+
+{% if error %}
+<div class="modal fade show" id="errorModal" tabindex="-1" style="display:block; background:rgba(0,0,0,0.5);" aria-modal="true" role="dialog">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title"><i class="bi bi-exclamation-triangle me-2"></i>Registration Failed</h5>
+      </div>
+      <div class="modal-body text-center">
+        <p class="mb-2">{{ error }}</p>
+      </div>
+      <div class="modal-footer justify-content-center">
+        <button type="button" class="btn btn-primary" onclick="document.getElementById('errorModal').style.display='none';">
+          <i class="bi bi-arrow-left me-1"></i>Try again
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
 {% endblock %}
