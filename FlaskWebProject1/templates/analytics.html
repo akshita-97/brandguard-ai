@@ -6,53 +6,72 @@
   <h2 class="mb-0 fw-bold">Review Analytics</h2>
   <span class="badge bg-secondary ms-2">Improvement 3</span>
 </div>
+<p class="text-muted small">Click any count below to see the matching findings.</p>
 
 <div class="row g-3 mb-4">
   <div class="col-md-3">
-    <div class="card text-center shadow-sm"><div class="card-body">
-      <div class="fs-2 fw-bold text-primary">{{ data.total_reviews }}</div>
-      <div class="small text-muted">Total reviews</div>
-    </div></div>
+    <div class="card text-center shadow-sm clickable-stat" data-filter="all" style="cursor:pointer;">
+      <div class="card-body">
+        <div class="fs-2 fw-bold text-primary">{{ data.total_reviews }}</div>
+        <div class="small text-muted">Total reviews</div>
+      </div>
+    </div>
   </div>
   <div class="col-md-3">
-    <div class="card text-center shadow-sm"><div class="card-body">
-      <div class="fs-2 fw-bold text-success">{{ data.approved }}</div>
-      <div class="small text-muted">Approved</div>
-    </div></div>
+    <div class="card text-center shadow-sm clickable-stat" data-filter="approved" style="cursor:pointer;">
+      <div class="card-body">
+        <div class="fs-2 fw-bold text-success">{{ data.approved }}</div>
+        <div class="small text-muted">Approved</div>
+      </div>
+    </div>
   </div>
   <div class="col-md-3">
-    <div class="card text-center shadow-sm"><div class="card-body">
-      <div class="fs-2 fw-bold text-danger">{{ data.rejected }}</div>
-      <div class="small text-muted">Rejected</div>
-    </div></div>
+    <div class="card text-center shadow-sm clickable-stat" data-filter="rejected" style="cursor:pointer;">
+      <div class="card-body">
+        <div class="fs-2 fw-bold text-danger">{{ data.rejected }}</div>
+        <div class="small text-muted">Rejected</div>
+      </div>
+    </div>
   </div>
   <div class="col-md-3">
-    <div class="card text-center shadow-sm"><div class="card-body">
-      <div class="fs-2 fw-bold text-warning">{{ data.pending }}</div>
-      <div class="small text-muted">Pending decision</div>
-    </div></div>
+    <div class="card text-center shadow-sm clickable-stat" data-filter="pending" style="cursor:pointer;">
+      <div class="card-body">
+        <div class="fs-2 fw-bold text-warning">{{ data.pending }}</div>
+        <div class="small text-muted">Pending decision</div>
+      </div>
+    </div>
   </div>
 </div>
 
 <div class="row g-3 mb-4">
   <div class="col-md-6">
     <div class="card shadow-sm">
-      <div class="card-header fw-semibold">Findings by severity</div>
+      <div class="card-header fw-semibold">Findings by severity (click to view)</div>
       <div class="card-body">
-        <div class="mb-2"><span class="badge bg-danger me-2">critical</span> {{ data.severity.get('critical', 0) }}</div>
-        <div class="mb-2"><span class="badge bg-warning text-dark me-2">high</span> {{ data.severity.get('high', 0) }}</div>
-        <div class="mb-2"><span class="badge bg-info text-dark me-2">medium</span> {{ data.severity.get('medium', 0) }}</div>
-        <div class="mb-2"><span class="badge bg-secondary me-2">low</span> {{ data.severity.get('low', 0) }}</div>
+        <div class="mb-2 clickable-stat" data-filter="severity:critical" style="cursor:pointer;">
+          <span class="badge bg-danger me-2">critical</span> {{ data.severity.get('critical', 0) }}
+        </div>
+        <div class="mb-2 clickable-stat" data-filter="severity:high" style="cursor:pointer;">
+          <span class="badge bg-warning text-dark me-2">high</span> {{ data.severity.get('high', 0) }}
+        </div>
+        <div class="mb-2 clickable-stat" data-filter="severity:medium" style="cursor:pointer;">
+          <span class="badge bg-info text-dark me-2">medium</span> {{ data.severity.get('medium', 0) }}
+        </div>
+        <div class="mb-2 clickable-stat" data-filter="severity:low" style="cursor:pointer;">
+          <span class="badge bg-secondary me-2">low</span> {{ data.severity.get('low', 0) }}
+        </div>
         <div class="mt-2 small text-muted">Total findings: {{ data.total_findings }} (avg {{ data.avg_findings }} per review)</div>
       </div>
     </div>
   </div>
   <div class="col-md-6">
     <div class="card shadow-sm">
-      <div class="card-header fw-semibold">Findings by issue type</div>
+      <div class="card-header fw-semibold">Findings by issue type (click to view)</div>
       <div class="card-body">
         {% for t, c in data.types %}
-        <div class="mb-1"><span class="badge bg-secondary me-2">{{ t }}</span> {{ c }}</div>
+        <div class="mb-1 clickable-stat" data-filter="type:{{ t }}" style="cursor:pointer;">
+          <span class="badge bg-secondary me-2">{{ t }}</span> {{ c }}
+        </div>
         {% else %}
         <div class="text-muted small">No findings yet.</div>
         {% endfor %}
@@ -76,10 +95,12 @@
   </div>
   <div class="col-md-6">
     <div class="card shadow-sm">
-      <div class="card-header fw-semibold">Reviewer decisions</div>
+      <div class="card-header fw-semibold">Reviewer decisions (click to view)</div>
       <div class="card-body">
         {% for k, v in data.reviewer.items() %}
-        <div class="mb-1"><span class="badge bg-info text-dark me-2">{{ k }}</span> {{ v }}</div>
+        <div class="mb-1 clickable-stat" data-filter="decision:{{ k }}" style="cursor:pointer;">
+          <span class="badge bg-info text-dark me-2">{{ k }}</span> {{ v }}
+        </div>
         {% else %}
         <div class="text-muted small">No decisions recorded yet.</div>
         {% endfor %}
@@ -88,4 +109,68 @@
     </div>
   </div>
 </div>
+
+<!-- Modal for filtered findings -->
+<div class="modal fade" id="findingsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="findingsModalTitle">Findings</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="findingsModalBody">
+        <div class="text-muted">Loading...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% block scripts %}
+<script>
+(function() {
+  document.querySelectorAll('.clickable-stat').forEach(el => {
+    el.addEventListener('click', async () => {
+      const filter = el.dataset.filter;
+      let url = '/api/findings?limit=100';
+      let title = 'Findings';
+      if (filter === 'all') { title = 'All findings'; }
+      else if (filter === 'approved') { url += '&status=Accepted'; title = 'Accepted findings'; }
+      else if (filter === 'rejected') { url += '&status=Rejected'; title = 'Rejected findings'; }
+      else if (filter === 'pending') { url += '&status=Needs+Review'; title = 'Pending findings'; }
+      else if (filter.startsWith('severity:')) { url += '&severity=' + filter.split(':')[1]; title = filter.split(':')[1] + ' severity findings'; }
+      else if (filter.startsWith('type:')) { url += '&issue_type=' + encodeURIComponent(filter.split(':')[1]); title = filter.split(':')[1] + ' findings'; }
+      else if (filter.startsWith('decision:')) { url += '&reviewer_decision=' + filter.split(':')[1]; title = filter.split(':')[1] + ' decisions'; }
+
+      document.getElementById('findingsModalTitle').textContent = title;
+      document.getElementById('findingsModalBody').innerHTML = '<div class="text-muted">Loading...</div>';
+      new bootstrap.Modal(document.getElementById('findingsModal')).show();
+
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        if (!data.findings.length) {
+          document.getElementById('findingsModalBody').innerHTML = '<div class="text-muted">No findings match this filter.</div>';
+          return;
+        }
+        let html = '<div class="small text-muted mb-2">' + data.count + ' finding(s)</div>';
+        data.findings.forEach(f => {
+          html += '<div class="border rounded p-2 mb-2">';
+          html += '<div class="mb-1"><span class="badge bg-secondary">' + f.issue_type + '</span> ';
+          html += '<span class="badge bg-' + (f.severity==='critical'?'danger':f.severity==='high'?'warning text-dark':f.severity==='medium'?'info text-dark':'secondary') + '">' + f.severity + '</span>';
+          html += ' <span class="badge bg-light text-dark border ms-1">' + f.status + '</span>';
+          if (f.reviewer_decision) html += ' <span class="badge bg-info text-dark ms-1">' + f.reviewer_decision + '</span>';
+          html += '</div>';
+          html += '<div class="finding-original mb-1" style="font-size:.8rem;">' + f.original_text.replace(/</g,'&lt;') + '</div>';
+          html += '<div class="small">' + f.explanation + '</div>';
+          if (f.suggested_correction) html += '<div class="small mt-1"><strong>Suggestion:</strong> ' + f.suggested_correction + '</div>';
+          html += '</div>';
+        });
+        document.getElementById('findingsModalBody').innerHTML = html;
+      } catch (e) {
+        document.getElementById('findingsModalBody').innerHTML = '<div class="text-danger">Error: ' + e.message + '</div>';
+      }
+    });
+  });
+})();
+</script>
 {% endblock %}

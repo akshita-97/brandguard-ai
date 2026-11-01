@@ -269,6 +269,44 @@ def health():
     return jsonify({"status": "ok", "ai_enabled": is_enabled()})
 
 
+@app.route("/api/findings")
+def api_findings():
+    """Return findings filtered by optional query params."""
+    severity = request.args.get("severity")
+    issue_type = request.args.get("issue_type")
+    status = request.args.get("status")
+    reviewer_decision = request.args.get("reviewer_decision")
+    limit = request.args.get("limit", default=50, type=int)
+    limit = max(1, min(limit, 200))
+
+    conn = get_connection()
+    try:
+        q = """SELECT f.*, r.profile_id, p.name AS profile_name
+               FROM findings f
+               JOIN reviews r ON r.id = f.review_id
+               LEFT JOIN brand_profiles p ON p.id = r.profile_id
+               WHERE 1=1"""
+        params = []
+        if severity:
+            q += " AND f.severity = ?"
+            params.append(severity)
+        if issue_type:
+            q += " AND f.issue_type = ?"
+            params.append(issue_type)
+        if status:
+            q += " AND f.status = ?"
+            params.append(status)
+        if reviewer_decision:
+            q += " AND f.reviewer_decision = ?"
+            params.append(reviewer_decision)
+        q += " ORDER BY f.id DESC LIMIT ?"
+        params.append(limit)
+        rows = conn.execute(q, params).fetchall()
+        return jsonify({"findings": [row_to_dict(r) for r in rows], "count": len(rows)})
+    finally:
+        conn.close()
+
+
 @app.route("/api/review/<int:review_id>/report")
 def api_review_report(review_id):
     conn = get_connection()
