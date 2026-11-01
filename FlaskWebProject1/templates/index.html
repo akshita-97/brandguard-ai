@@ -57,8 +57,8 @@
         </div>
         <div class="mb-3 d-flex align-items-center gap-2">
           <span class="fw-bold">Brand Compliance Score:</span>
-          <span id="complianceScore" class="fs-4 fw-bold text-primary">100</span>
-          <span class="text-muted small">/ 100</span>
+          <span id="complianceScore" class="fs-4 fw-bold text-muted">—</span>
+          <span class="text-muted small" id="scoreLabel">/ 100 (run a check first)</span>
           <div class="progress flex-grow-1" style="height:8px;">
             <div id="scoreBar" class="progress-bar bg-success" role="progressbar" style="width:100%"></div>
           </div>
@@ -103,7 +103,7 @@
         <div class="small text-muted mt-2">
           <i class="bi bi-info-circle me-1"></i>
           <strong>Workflow:</strong> Author submits content → Reviewer reviews findings and submits review → Approver makes final approve/reject decision.
-          Roles are enforced for logged-in users (reviewer cannot finalize, author cannot review). Anonymous demo mode allows all actions for testing.
+          Backend enforces role permissions for logged-in users. Anonymous demo mode allows all actions so judges can test the full workflow without registering.
         </div>
       </div>
     </div>
@@ -140,8 +140,8 @@
     </div>
     <div class="card shadow-sm mt-3">
       <div class="card-header fw-semibold d-flex justify-content-between align-items-center">
-        <span><i class="bi bi-image me-1"></i>Visual brand check</span>
-        <span class="badge bg-secondary">Improvement 2</span>
+        <span><i class="bi bi-image me-1"></i>Visual Brand Compliance Checker</span>
+        <span class="badge bg-success">Implemented</span>
       </div>
       <div class="card-body small">
         <p class="text-muted mb-2">Upload a logo, banner, or graphic to check colours, dimensions, and format.</p>

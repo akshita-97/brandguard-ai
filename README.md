@@ -202,5 +202,6 @@ All three improvements are implemented and tested.
 - AI assistance requires an external API key and network access; disabled by default.
 - SQLite is suitable for MVP; high-traffic production should use a managed database.
 - Fact checking uses configured patterns; arbitrary unstructured claims are flagged as "Needs Review" rather than judged false.
-- No user authentication in the public demo; rules are read-only.
+- User authentication is implemented (register/login/logout with role-based permissions), but the public demo allows anonymous access for testing.
+- Brand rules are read-only in the public demo (no anonymous admin editing).
 - CSRF protection is lightweight and session-based.

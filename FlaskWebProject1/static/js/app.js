@@ -118,20 +118,18 @@
       document.getElementById("profileName").textContent = data.profile_name;
       document.getElementById("issueCount").textContent = data.total_issues;
       document.getElementById("aiUsed").textContent = data.ai_used ? "Yes" : "No";
-      const score = data.compliance_score || 100;
+      const score = data.compliance_score !== undefined ? data.compliance_score : 100;
       const scoreEl = document.getElementById("complianceScore");
       const scoreBar = document.getElementById("scoreBar");
+      const scoreLabel = document.getElementById("scoreLabel");
       scoreEl.textContent = score;
       scoreEl.className = "fs-4 fw-bold " + (score >= 80 ? "text-success" : score >= 50 ? "text-warning" : "text-danger");
       scoreBar.style.width = score + "%";
       scoreBar.className = "progress-bar " + (score >= 80 ? "bg-success" : score >= 50 ? "bg-warning" : "bg-danger");
+      scoreLabel.textContent = "/ 100";
       const subLine = document.getElementById("submittedByLine");
-      if (data.submitted_by) {
-        document.getElementById("submittedBy").textContent = data.submitted_by;
-        subLine.style.display = "block";
-      } else {
-        subLine.style.display = "none";
-      }
+      document.getElementById("submittedBy").textContent = data.submitted_by || "Anonymous (demo)";
+      subLine.style.display = "block";
 
       const counts = { critical: 0, high: 0, medium: 0, low: 0 };
       data.findings.forEach((f) => { if (counts[f.severity] !== undefined) counts[f.severity]++; });
@@ -377,7 +375,7 @@
         const r = data.review;
         let html = `<p><strong>Profile:</strong> ${escapeHtml(data.profile_name)}</p>`;
         html += `<p><strong>Status:</strong> ${escapeHtml(r.overall_status)} &nbsp; <strong>Issues:</strong> ${r.total_issues}</p>`;
-        if (data.submitted_by) html += `<p class="small text-muted mb-1"><strong>Submitted by (Author):</strong> ${escapeHtml(data.submitted_by)}</p>`;
+        html += `<p class="small text-muted mb-1"><strong>Submitted by (Author):</strong> ${escapeHtml(data.submitted_by || "Anonymous (demo)")}</p>`;
         if (r.review_notes) html += `<p class="small mb-1"><strong>Reviewer comments:</strong> ${escapeHtml(r.review_notes)}</p>`;
         if (data.reviewed_by) html += `<p class="small text-muted mb-1"><strong>Reviewed by (Reviewer):</strong> ${escapeHtml(data.reviewed_by)}</p>`;
         html += `<p><strong>Final decision:</strong> ${escapeHtml(r.final_decision || "—")}</p>`;
