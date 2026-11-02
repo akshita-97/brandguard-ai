@@ -28,7 +28,7 @@ class Config:
 
     AI_API_KEY = os.environ.get("AI_API_KEY", "").strip()
     AI_API_BASE = os.environ.get("AI_API_BASE", "https://api.openai.com/v1").rstrip("/")
-    AI_MODEL = os.environ.get("AI_MODEL", "gpt-4o-mini")
+    AI_MODEL = os.environ.get("AI_MODEL", "openai/gpt-oss-20b")
     try:
         AI_TIMEOUT = int(os.environ.get("AI_TIMEOUT", "15"))
     except (ValueError, TypeError):

@@ -286,9 +286,10 @@
           aiResult.style.display = "block";
           aiResult.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Asking AI...';
           try {
+            const profile_id = document.getElementById("profileSelect") ? document.getElementById("profileSelect").value : 1;
             const data = await api("/api/ai/explain", {
               method: "POST",
-              body: JSON.stringify({ content: contentInput ? contentInput.value : "", finding: f, profile_name: "Demo Brand" })
+              body: JSON.stringify({ content: contentInput ? contentInput.value : "", finding: f, profile_id: profile_id, profile_name: "Demo Brand" })
             });
             if (data.ai_used) {
               let html = "";

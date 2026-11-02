@@ -106,7 +106,7 @@ def explain_finding(content: str, finding: dict, profile_name: str = "") -> dict
     return {"explanation": expl, "rewrite": rewrite, "ai_used": ai_used}
 
 
-def chat(question: str, content: str = "", profile_name: str = "") -> dict:
+def chat(question: str, content: str = "", profile_name: str = "", rules_context: str = "") -> dict:
     """Return {'answer': str, 'ai_used': bool} for a user question about brand guidelines."""
     if not is_enabled():
         return {"answer": None, "ai_used": False}
@@ -118,6 +118,8 @@ def chat(question: str, content: str = "", profile_name: str = "") -> dict:
         "Return only valid JSON with key: answer."
     )
     user = "Question: {}\n".format(question[:500])
+    if rules_context:
+        user += "Brand rules and approved facts:\n{}\n".format(rules_context[:2000])
     if content:
         user += "Current content being reviewed:\n---\n{}\n---\n".format(content[:2000])
     if profile_name:

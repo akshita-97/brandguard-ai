@@ -105,10 +105,12 @@
     sendBtn.disabled = true;
     try {
       const content = (document.getElementById("contentInput") || {}).value || "";
+      const profileSelect = document.getElementById("profileSelect");
+      const profile_id = profileSelect ? profileSelect.value : 1;
       const res = await fetch("/api/ai/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json", "X-CSRFToken": (document.querySelector('meta[name="csrf-token"]') || {}).content || "" },
-        body: JSON.stringify({ question: q, content: content, profile_name: "Demo Brand" })
+        body: JSON.stringify({ question: q, content: content, profile_id: profile_id, profile_name: "Demo Brand" })
       });
       const data = await res.json();
       if (data.ai_used && data.answer) {

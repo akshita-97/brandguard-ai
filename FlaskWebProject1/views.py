@@ -273,6 +273,14 @@ def api_ai_explain():
     profile_name = (payload.get("profile_name") or "").strip()
     if not content or not isinstance(finding, dict):
         return _json_error("Content and finding are required.")
+    if not profile_name:
+        try:
+            pid = int(payload.get("profile_id"))
+            pd = load_profile(pid)
+            if pd:
+                profile_name = pd.get("profile", {}).get("name", "")
+        except Exception:
+            pass
     result = explain_finding(content, finding, profile_name)
     return jsonify(result)
 
@@ -285,7 +293,26 @@ def api_ai_chat():
     profile_name = (payload.get("profile_name") or "").strip()
     if not question:
         return _json_error("Question is required.")
-    result = ai_chat(question, content, profile_name)
+    # Fetch brand rules for context
+    rules_context = ""
+    profile_id = payload.get("profile_id")
+    if profile_id:
+        try:
+            profile_data = load_profile(int(profile_id))
+            if profile_data:
+                rules = profile_data.get("rules", [])
+                facts = profile_data.get("facts", [])
+                parts = []
+                for r in rules:
+                    parts.append("- {}: {} (severity: {})".format(r["rule_type"], r["pattern"], r["severity"]))
+                for f in facts:
+                    parts.append("- Approved fact: {} = {}".format(f["fact_key"], f["fact_value"]))
+                rules_context = "\n".join(parts)
+                if not profile_name:
+                    profile_name = profile_data.get("profile", {}).get("name", "")
+        except Exception:
+            pass
+    result = ai_chat(question, content, profile_name, rules_context)
     return jsonify(result)
 
 
