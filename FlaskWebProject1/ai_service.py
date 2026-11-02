@@ -113,13 +113,17 @@ def chat(question: str, content: str = "", profile_name: str = "", rules_context
 
     system = (
         "You are BrandGuard AI's helpful assistant. Answer questions about brand guidelines, "
-        "content review, and how to use the application. Be concise and practical. "
-        "Never make up facts about the brand. If you don't know, say so. "
+        "content review, and how to use THIS application. Be concise and practical. "
+        "ONLY use the information provided below. Do NOT make up features, pages, or details "
+        "that are not listed. If you don't know, say so honestly. "
+        "The application has these pages: Review (home), Guidelines, History, Analytics, About, Notifications. "
+        "Features: content submission, brand profile selection, rule-based checking, findings with explanations, "
+        "human approval/rejection, review history, optional AI, visual brand check, document upload, analytics. "
         "Return only valid JSON with key: answer."
     )
     user = "Question: {}\n".format(question[:500])
     if rules_context:
-        user += "Brand rules and approved facts:\n{}\n".format(rules_context[:2000])
+        user += "Brand rules and approved facts for the selected profile:\n{}\n".format(rules_context[:2000])
     if content:
         user += "Current content being reviewed:\n---\n{}\n---\n".format(content[:2000])
     if profile_name:
