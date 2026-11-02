@@ -17,7 +17,7 @@ from FlaskWebProject1.db import (get_connection, row_to_dict, list_profiles,
     add_notification, list_notifications, unread_notification_count, get_analytics,
     list_brand_colors, list_brand_assets, add_audit_log, list_audit_log)
 from FlaskWebProject1.engine import check_content, load_profile
-from FlaskWebProject1.ai_service import enhance, is_enabled
+from FlaskWebProject1.ai_service import enhance, is_enabled, explain_finding, chat as ai_chat
 from FlaskWebProject1.visual_service import check_image
 
 
@@ -264,6 +264,31 @@ def api_submit_review(review_id):
 
 
 # ---------- API ----------
+# ---------- AI assistant (Options A+B+C) ----------
+@app.route("/api/ai/explain", methods=["POST"])
+def api_ai_explain():
+    payload = request.get_json(silent=True) or {}
+    content = (payload.get("content") or "").strip()
+    finding = payload.get("finding") or {}
+    profile_name = (payload.get("profile_name") or "").strip()
+    if not content or not isinstance(finding, dict):
+        return _json_error("Content and finding are required.")
+    result = explain_finding(content, finding, profile_name)
+    return jsonify(result)
+
+
+@app.route("/api/ai/chat", methods=["POST"])
+def api_ai_chat():
+    payload = request.get_json(silent=True) or {}
+    question = (payload.get("question") or "").strip()
+    content = (payload.get("content") or "").strip()
+    profile_name = (payload.get("profile_name") or "").strip()
+    if not question:
+        return _json_error("Question is required.")
+    result = ai_chat(question, content, profile_name)
+    return jsonify(result)
+
+
 @app.route("/health")
 def health():
     return jsonify({"status": "ok", "ai_enabled": is_enabled()})

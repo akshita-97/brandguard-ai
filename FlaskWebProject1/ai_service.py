@@ -67,6 +67,71 @@ def _call_chat(messages):
         return None
 
 
+def explain_finding(content: str, finding: dict, profile_name: str = "") -> dict:
+    """Return {'explanation': str, 'rewrite': str, 'ai_used': bool}.
+
+    AI explains a single finding in plain language and proposes a full rewrite
+    of the problematic sentence. Falls back gracefully on failure.
+    """
+    if not is_enabled():
+        return {"explanation": None, "rewrite": None, "ai_used": False}
+
+    system = (
+        "You are a brand-governance assistant. Explain findings in plain language "
+        "and propose a corrected version of the sentence. Never invent facts. "
+        "Return only valid JSON with keys: explanation, rewrite."
+    )
+    user = (
+        "Brand profile: {}\n".format(profile_name or "Demo Brand") +
+        "Original content:\n---\n{}\n---\n".format(content[:3000]) +
+        "Finding to explain:\n"
+        "Issue type: {}\n".format(finding.get("issue_type")) +
+        "Severity: {}\n".format(finding.get("severity")) +
+        "Original text: {}\n".format(finding.get("original_text")) +
+        "Rule reference: {}\n".format(finding.get("rule_reference")) +
+        "Current suggestion: {}\n".format(finding.get("suggested_correction")) +
+        "\nReturn JSON: {\"explanation\": \"plain-language explanation of why this matters\", "
+        "\"rewrite\": \"a full rewritten version of the original sentence that fixes the issue\"}. "
+        "Keep explanation under 60 words. Keep rewrite under 80 words."
+    )
+
+    parsed = _call_chat([{"role": "system", "content": system},
+                        {"role": "user", "content": user}])
+    if not isinstance(parsed, dict):
+        return {"explanation": None, "rewrite": None, "ai_used": False}
+
+    expl = _sanitize_text(parsed.get("explanation"), 300)
+    rewrite = _sanitize_text(parsed.get("rewrite"), 400)
+    ai_used = bool(expl or rewrite)
+    return {"explanation": expl, "rewrite": rewrite, "ai_used": ai_used}
+
+
+def chat(question: str, content: str = "", profile_name: str = "") -> dict:
+    """Return {'answer': str, 'ai_used': bool} for a user question about brand guidelines."""
+    if not is_enabled():
+        return {"answer": None, "ai_used": False}
+
+    system = (
+        "You are BrandGuard AI's helpful assistant. Answer questions about brand guidelines, "
+        "content review, and how to use the application. Be concise and practical. "
+        "Never make up facts about the brand. If you don't know, say so. "
+        "Return only valid JSON with key: answer."
+    )
+    user = "Question: {}\n".format(question[:500])
+    if content:
+        user += "Current content being reviewed:\n---\n{}\n---\n".format(content[:2000])
+    if profile_name:
+        user += "Brand profile: {}\n".format(profile_name)
+    user += "\nReturn JSON: {\"answer\": \"your helpful answer (under 120 words)\"}."
+
+    parsed = _call_chat([{"role": "system", "content": system},
+                        {"role": "user", "content": user}])
+    if not isinstance(parsed, dict):
+        return {"answer": None, "ai_used": False}
+    ans = _sanitize_text(parsed.get("answer"), 600)
+    return {"answer": ans, "ai_used": bool(ans)}
+
+
 def enhance(content: str, findings: list) -> dict:
     result_findings = [dict(f) for f in findings]
     ai_used = False

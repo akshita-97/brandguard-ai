@@ -274,6 +274,38 @@
       document.getElementById("mRule").textContent = f.rule_reference || "";
       document.getElementById("mCitation").textContent = f.citation || "—";
       document.getElementById("mSuggestion").textContent = f.suggested_correction || "";
+
+      // AI Explain button
+      const aiBtn = document.getElementById("aiExplainBtn");
+      const aiResult = document.getElementById("aiExplainResult");
+      if (aiBtn) {
+        aiResult.style.display = "none";
+        aiResult.innerHTML = "";
+        aiBtn.onclick = async () => {
+          aiBtn.disabled = true;
+          aiResult.style.display = "block";
+          aiResult.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Asking AI...';
+          try {
+            const data = await api("/api/ai/explain", {
+              method: "POST",
+              body: JSON.stringify({ content: contentInput ? contentInput.value : "", finding: f, profile_name: "Demo Brand" })
+            });
+            if (data.ai_used) {
+              let html = "";
+              if (data.explanation) html += `<div class="mb-2"><strong>AI Explanation:</strong> ${escapeHtml(data.explanation)}</div>`;
+              if (data.rewrite) html += `<div class="mb-2"><strong>AI Rewrite:</strong> <span class="text-success">${escapeHtml(data.rewrite)}</span></div>`;
+              if (!html) html = "AI returned no useful response.";
+              aiResult.innerHTML = html + '<div class="text-muted small mt-1"><i class="bi bi-robot me-1"></i>AI-assisted (advisory only)</div>';
+            } else {
+              aiResult.innerHTML = '<span class="text-muted">AI is disabled or unavailable. Rule-based explanation shown above.</span>';
+            }
+          } catch (e) {
+            aiResult.innerHTML = `<span class="text-danger">${escapeHtml(e.message)}</span>`;
+          } finally {
+            aiBtn.disabled = false;
+          }
+        };
+      }
       document.getElementById("mNotes").value = "";
       findingModal.show();
     }
