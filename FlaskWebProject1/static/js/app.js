@@ -454,6 +454,12 @@
               <div class="small">${escapeHtml(f.explanation)}</div>
               ${f.citation ? `<div class="small mt-1"><strong>Source:</strong> ${escapeHtml(f.citation)}</div>` : ""}
               ${f.suggested_correction ? `<div class="small mt-1"><strong>Suggestion:</strong> ${escapeHtml(f.suggested_correction)}</div>` : ""}
+              <div class="mt-2">
+                <button class="btn btn-sm btn-outline-info" onclick="explainFindingHistory(${id}, ${JSON.stringify(f).replace(/</g,'&lt;')})">
+                  <i class="bi bi-robot me-1"></i>Explain with AI
+                </button>
+                <div id="aiHistResult-${id}-${f.id}" class="mt-2 small" style="display:none;"></div>
+              </div>
               ${f.reviewer_notes ? `<div class="small mt-1 text-muted"><strong>Reviewer notes:</strong> ${escapeHtml(f.reviewer_notes)}</div>` : ""}
             </div>`;
           });
@@ -481,6 +487,32 @@
         setTimeout(() => viewReview(id), 800);
       } catch (e) {
         if (msg) msg.innerHTML = `<span class="text-danger">${escapeHtml(e.message)}</span>`;
+      }
+    };
+
+    window.explainFindingHistory = async function(reviewId, finding) {
+      const resultDiv = document.getElementById(`aiHistResult-${reviewId}-${finding.id}`);
+      if (!resultDiv) return;
+      resultDiv.style.display = "block";
+      resultDiv.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Asking AI...';
+      try {
+        const reviewData = await api(`/api/review/${reviewId}`);
+        const content = reviewData.review.content || "";
+        const data = await api("/api/ai/explain", {
+          method: "POST",
+          body: JSON.stringify({ content: content, finding: finding, profile_name: reviewData.profile_name || "Demo Brand" })
+        });
+        if (data.ai_used) {
+          let html = "";
+          if (data.explanation) html += `<div class="mb-1"><strong>AI Explanation:</strong> ${escapeHtml(data.explanation)}</div>`;
+          if (data.rewrite) html += `<div class="mb-1"><strong>AI Rewrite:</strong> <span class="text-success">${escapeHtml(data.rewrite)}</span></div>`;
+          if (!html) html = "AI returned no useful response.";
+          resultDiv.innerHTML = html + '<div class="text-muted small mt-1"><i class="bi bi-robot me-1"></i>AI-assisted (advisory only)</div>';
+        } else {
+          resultDiv.innerHTML = '<span class="text-muted">AI is disabled or unavailable.</span>';
+        }
+      } catch (e) {
+        resultDiv.innerHTML = `<span class="text-danger">${escapeHtml(e.message)}</span>`;
       }
     };
 
