@@ -443,7 +443,7 @@
         if (!data.findings || data.findings.length === 0) {
           html += `<p class="text-muted">No findings.</p>`;
         } else {
-          data.findings.forEach((f) => {
+          data.findings.forEach((f, idx) => {
             html += `<div class="border rounded p-2 mb-2">
               <div class="mb-1"><span class="badge bg-secondary">${escapeHtml(f.issue_type)}</span> ${sevBadge(f.severity)}
                 <span class="badge bg-dark ms-1">conf: ${escapeHtml(f.confidence || "medium")}</span>
