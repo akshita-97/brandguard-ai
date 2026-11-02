@@ -160,6 +160,7 @@ The new profile, rules, facts, colours, and logo dimension rules appear in the a
 
 ## Completed features checklist (Round 2 + Round 3)
 
+### Round 2 (core workflow)
 - [x] Content submission with validation and sample content
 - [x] Brand profile + guidelines + approved facts (read-only demo)
 - [x] Review engine (prohibited terms, facts, claims, tone, accessibility, style, uncertain claims)
@@ -172,6 +173,8 @@ The new profile, rules, facts, colours, and logo dimension rules appear in the a
 - [x] Automated tests (17 passing: 8 engine + 9 route, including end-to-end workflow and persistence)
 - [x] Public deployment (PythonAnywhere)
 - [x] README, submission doc, demo script
+
+### Round 3 (three promised improvements - all completed)
 - [x] Evidence-backed findings with source citation and confidence (Round 3)
 - [x] Visual brand checking: image upload, colour/dimension/format checks (Round 3)
 - [x] User accounts with roles (author/reviewer/approver) and login/logout (Round 3)
@@ -179,6 +182,28 @@ The new profile, rules, facts, colours, and logo dimension rules appear in the a
 - [x] In-app notifications (Round 3)
 - [x] CMS webhook integration on approval (Round 3)
 - [x] Document upload for fact extraction (.txt/.pdf) (Round 3)
+
+### Additional improvements (beyond the three promised)
+- [x] Brand Compliance Score (0-100) with color-coded progress bar
+- [x] Side-by-side comparison (original vs suggested) in finding modal
+- [x] Downloadable review report (text file with findings, citations, audit trail)
+- [x] Printable review report (print-friendly CSS)
+- [x] Audit log (complete action history with user, timestamp, IP)
+- [x] Audit page (table view of all audit entries)
+- [x] Recheck button (re-runs check on current content)
+- [x] Login/register error popup with "Re-enter credentials" button
+- [x] Active nav link highlighting (shows current page)
+- [x] White background with professional card shadows and button gradients
+- [x] "How to test" guide on homepage (8-step checklist for judges)
+- [x] Severity summary counts on results card
+- [x] "Explain with AI" button on findings (both Review and History pages)
+- [x] AI chat widget (floating robot button, bottom-right)
+- [x] AI tone analysis on submission (adds AI-observed findings)
+- [x] Clickable analytics (filter findings by severity, type, status, decision)
+- [x] Role-based UI (reviewer sees "Submit review", approver sees "Approve/Reject")
+- [x] Submitted by / Reviewed by / Decided by tracking in history
+- [x] Privacy note on History page
+- [x] GitHub repo About section (description, website, topics)
 
 ## Changes from Round 1
 
