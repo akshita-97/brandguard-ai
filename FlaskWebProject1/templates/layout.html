@@ -115,8 +115,10 @@
       const data = await res.json();
       if (data.ai_used && data.answer) {
         messages.innerHTML += `<div class="mb-2"><strong>AI:</strong> ${esc(data.answer)}</div>`;
+      } else if (data.answer) {
+        messages.innerHTML += `<div class="mb-2"><strong>AI:</strong> ${esc(data.answer)}</div>`;
       } else {
-        messages.innerHTML += `<div class="mb-2 text-muted"><strong>AI:</strong> AI is disabled or unavailable. Try asking about the brand rules on the Guidelines page.</div>`;
+        messages.innerHTML += `<div class="mb-2 text-muted"><strong>AI:</strong> AI is busy or unavailable. Please try again in a moment.</div>`;
       }
     } catch (e) {
       messages.innerHTML += `<div class="mb-2 text-danger"><strong>Error:</strong> ${esc(e.message)}</div>`;

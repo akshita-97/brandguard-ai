@@ -44,9 +44,18 @@ def _call_chat(messages):
         "max_tokens": 900,
         "response_format": {"type": "json_object"},
     }
-    try:
-        resp = requests.post(url, headers=_headers(), json=payload, timeout=Config.AI_TIMEOUT)
-    except requests.RequestException:
+    for attempt in range(2):
+        try:
+            resp = requests.post(url, headers=_headers(), json=payload, timeout=Config.AI_TIMEOUT)
+        except requests.RequestException:
+            return None
+        if resp.status_code == 200:
+            break
+        if resp.status_code == 429:
+            # Rate limited — wait briefly and retry
+            import time
+            time.sleep(1)
+            continue
         return None
     if resp.status_code != 200:
         return None
