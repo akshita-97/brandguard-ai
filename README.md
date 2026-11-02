@@ -113,6 +113,18 @@ Expected: all tests pass. Tests use a temporary SQLite database and disable AI.
 - Use a production WSGI server (gunicorn) instead of the dev server.
 - Test the public URL in an incognito/private window.
 
+## Demo credentials (for judges)
+
+The database is seeded with three demo accounts (password: `demo123` for all):
+
+| Username | Password | Role |
+|----------|----------|------|
+| demo_author | demo123 | Author |
+| demo_reviewer | demo123 | Reviewer |
+| demo_approver | demo123 | Approver |
+
+These are shown on the login page. Anonymous access also works for full demo testing.
+
 ## Security notes
 
 - Brand rules are read-only in the public demo; no anonymous admin editing.

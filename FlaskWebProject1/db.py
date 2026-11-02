@@ -243,12 +243,31 @@ def row_to_dict(row):
     return {k: row[k] for k in row.keys()}
 
 
+def _seed_demo_users():
+    # Create demo accounts for judges (idempotent)
+    demos = [
+        ("demo_author", "demo123", "author", "Demo Author"),
+        ("demo_reviewer", "demo123", "reviewer", "Demo Reviewer"),
+        ("demo_approver", "demo123", "approver", "Demo Approver"),
+    ]
+    for username, password, role, display in demos:
+        existing = None
+        conn = get_connection()
+        try:
+            existing = conn.execute("SELECT id FROM users WHERE username = ?", (username,)).fetchone()
+        finally:
+            conn.close()
+        if not existing:
+            create_user(username, password, role, display)
+
+
 def seed_if_empty():
     with db_cursor() as cur:
         count = cur.execute("SELECT COUNT(*) FROM brand_profiles").fetchone()[0]
         if count and count > 0:
             for (pid,) in cur.execute("SELECT id FROM brand_profiles").fetchall():
                 _seed_colors_assets(cur, pid)
+            _seed_demo_users()
             return
 
     with db_cursor() as cur:
@@ -292,6 +311,8 @@ def seed_if_empty():
             )
 
         _seed_colors_assets(cur, profile_id)
+
+    _seed_demo_users()
 
 
 def create_user(username, password, role="author", display_name=None):
