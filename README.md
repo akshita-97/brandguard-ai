@@ -150,13 +150,63 @@ python add_brand_profile.py
 
 The new profile, rules, facts, colours, and logo dimension rules appear in the app immediately (refresh the page). To use real brand data instead of the demo, create a profile this way and select it from the dropdown.
 
-## What makes BrandGuard AI different
+## For Evaluators (read this first)
 
-- Transparent, rule-based findings with direct links to the configured rule or approved fact that triggered them.
+This section is written for judges who will test the project without a walkthrough.
+
+### What this app does
+BrandGuard AI checks content against approved brand rules before publication. A user pastes content, selects a brand profile, and clicks "Check Content". The system finds issues (prohibited terms, wrong facts, unsupported claims, tone problems, accessibility issues), explains each one, suggests corrections, and lets a human reviewer accept/reject each suggestion and make a final approve/reject decision. Everything is saved as review history.
+
+### How to test (no login required)
+1. Open the live URL in an **incognito/private window**: https://akshita97.pythonanywhere.com
+2. Click **"Load sample content"** → **"Check Content"**.
+3. You should see "Needs Review (High Priority)" with ~15 findings and a compliance score (e.g., 0-20/100).
+4. Click **"Review"** on any finding → a modal shows original text, explanation, rule, source citation, confidence, suggested correction.
+5. Click **"Accept suggestion"** / **"Reject suggestion"** / **"Mark resolved"** / **"Needs review"**.
+6. Click **"Approve content"** or **"Reject content"** at the bottom.
+7. Go to **History** → click **"View"** → your decisions are saved and persist after refresh.
+8. Go to **Guidelines** → see brand rules, approved facts with citations, upload a document.
+9. Go to **Analytics** → see review counts, severity breakdown, clickable findings.
+10. Upload an image in the **"Visual Brand Compliance Checker"** card → see colour/dimension/format checks.
+
+### How to test with login (optional)
+1. Click **Register** → create an account (author/reviewer/approver).
+2. Login → your name and role appear in the navbar.
+3. Submit content → notification created → see bell icon count.
+4. As a **reviewer**: you see "Submit review" button (not approve/reject).
+5. As an **approver**: you see "Approve/Reject" buttons (not submit review).
+6. As **anonymous**: you see both (demo mode for testing).
+
+### What the AI does
+- AI is **enabled** on the live site (free Groq API).
+- Navbar badge shows "AI assist on".
+- Chat widget (bottom-right robot button) answers questions about brand rules.
+- "Explain with AI" button on findings shows AI explanation + rewrite.
+- AI findings are labelled "(AI-assisted observation)" and reference the model name.
+- AI never overrides approved facts; on failure, app falls back to rule engine.
+
+### What does NOT work yet (honest limitations)
+- No user authentication enforced for anonymous users (demo mode allows all actions).
+- Brand rules are read-only (no admin UI to edit from the website).
+- SQLite is MVP-grade; high traffic needs a managed database.
+- Free hosting requires monthly "keep alive" click.
+- No visual brand compliance beyond colour/dimension/format checks.
+- No PDF export (only text report download and print).
+- Fact checking uses configured regex patterns; unstructured claims flagged "Needs Review".
+
+### Links
+- **Live app:** https://akshita97.pythonanywhere.com
+- **Source code:** https://github.com/akshita-97/brandguard-ai
+- **Health check:** https://akshita97.pythonanywhere.com/health
+
+### What makes BrandGuard AI different
+- Transparent, rule-based findings with direct links to the configured rule or approved fact.
 - Honest handling of unknown claims: marked "Needs Review" instead of being declared false.
 - Human-controlled final approval — the system never auto-publishes.
-- Simple, lightweight workflow suitable for smaller teams (no heavy frameworks).
+- Simple, lightweight workflow (no heavy frameworks).
 - Clear explanations and actionable suggested corrections.
+- Evidence traceability: every finding has a source citation and confidence score.
+- Complete audit trail: every decision recorded with user, timestamp, and IP.
 
 ## Completed features checklist (Round 2 + Round 3)
 
