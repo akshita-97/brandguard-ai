@@ -455,7 +455,7 @@
               ${f.citation ? `<div class="small mt-1"><strong>Source:</strong> ${escapeHtml(f.citation)}</div>` : ""}
               ${f.suggested_correction ? `<div class="small mt-1"><strong>Suggestion:</strong> ${escapeHtml(f.suggested_correction)}</div>` : ""}
               <div class="mt-2">
-                <button class="btn btn-sm btn-outline-info" onclick="explainFindingHistory(${id}, ${JSON.stringify(f).replace(/</g,'&lt;')})">
+                <button class="btn btn-sm btn-outline-info ai-hist-btn" data-review="${id}" data-idx="${idx}">
                   <i class="bi bi-robot me-1"></i>Explain with AI
                 </button>
                 <div id="aiHistResult-${id}-${f.id}" class="mt-2 small" style="display:none;"></div>
@@ -465,6 +465,18 @@
           });
         }
         document.getElementById("historyModalBody").innerHTML = html;
+        // Store findings for AI explain
+        window._histFindings = window._histFindings || {};
+        window._histFindings[id] = data.findings || [];
+        // Wire up AI explain buttons
+        document.querySelectorAll(".ai-hist-btn").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const rid = Number(btn.dataset.review);
+            const idx = Number(btn.dataset.idx);
+            const finding = (window._histFindings[rid] || [])[idx];
+            if (finding) explainFindingHistory(rid, finding);
+          });
+        });
         const histModalEl = document.getElementById("historyModal");
         let histModal = bootstrap.Modal.getInstance(histModalEl);
         if (!histModal) histModal = new bootstrap.Modal(histModalEl);
